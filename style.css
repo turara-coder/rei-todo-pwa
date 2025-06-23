@@ -542,11 +542,26 @@ body {
   outline: none;
   transition: all 0.3s ease;
   background: white;
+  /* スマホ対応 */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 #todo-input:focus {
   border-color: #74b9ff;
   box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.1);
+}
+
+/* モバイルデバイス対応 */
+@media (max-width: 768px) {
+  #todo-input {
+    font-size: 16px; /* iOS Safariのズーム防止 */
+    padding: 14px 18px;
+  }
 }
 
 /* 日時コンテナ */

@@ -561,8 +561,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCompletionDisplay();
     }
 
-    // ...existing code...
-
     // ========== データ管理関数 ==========
     function getStreakData() {
         const saved = localStorage.getItem('streakData');
@@ -1519,11 +1517,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     addTodo(todoText, dueDate, dueTime, repeatType);
                     todoForm.reset();
                     updateNextRepeatDate();
-                    todoInput.focus();
+                    
+                    // スマホ対応のフォーカス処理
+                    setTimeout(() => {
+                        if (todoInput) {
+                            todoInput.focus();
+                            // iOS Safari対応
+                            if (window.navigator.userAgent.includes('Safari') && 
+                                window.navigator.userAgent.includes('iPhone')) {
+                                todoInput.click();
+                            }
+                        }
+                    }, 100);
                 }
             });
         }
         
+        // スマホ対応: 入力フィールドのタップ処理
+        if (todoInput) {
+            todoInput.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.focus();
+                setTimeout(() => {
+                    this.click();
+                }, 10);
+            }, { passive: false });
+            
+            todoInput.addEventListener('click', function(e) {
+                this.focus();
+            });
+        }
+
         // PWAインストール関連
         if (installButton) {
             installButton.addEventListener('click', installApp);
@@ -1598,6 +1622,16 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeThemeSystem();
     loadCompletionData(); // 完了カウンターデータ読み込み
     
+    // スマホ対応: 初期フォーカス設定
+    setTimeout(() => {
+        if (todoInput && document.readyState === 'complete') {
+            // タッチデバイスでない場合のみ自動フォーカス
+            if (!('ontouchstart' in window)) {
+                todoInput.focus();
+            }
+        }
+    }, 500);
+
     // イベントリスナーの設定
     setupEventListeners();
 });

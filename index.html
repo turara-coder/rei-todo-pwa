@@ -100,7 +100,14 @@
     <!-- タスク追加フォーム -->
     <form id="todo-form" class="todo-form">
       <div class="input-group">
-        <input type="text" id="todo-input" placeholder="れいと一緒に今日なにする？" required />
+        <input type="text" 
+               id="todo-input" 
+               placeholder="れいと一緒に今日なにする？" 
+               autocomplete="off"
+               autocapitalize="sentences"
+               spellcheck="true"
+               inputmode="text"
+               required />
       </div>
       
       <div class="datetime-container">
