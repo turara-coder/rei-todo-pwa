@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>れいのToDo💖 - PWA版</title>
+  
+  <!-- PWAマニフェスト -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- iOS Safari対応 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="れいToDo">
+  <link rel="apple-touch-icon" href="icons/icon-152.png">
+  
+  <!-- Android Chrome対応 -->
+  <meta name="theme-color" content="#764ba2">
+  
+  <!-- その他のメタタグ -->
+  <meta name="description" content="れいちゃんと一緒に楽しくタスク管理♡ iPhone・Android対応のかわいいToDo管理アプリ">
+  <meta name="keywords" content="ToDo,タスク管理,かわいい,れい,PWA,iPhone,Android">
+  
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- プリロード -->
+  <link rel="preload" href="app.js" as="script">
+</head>
+<body>
+  <!-- インストール促進バナー -->
+  <div id="install-banner" class="install-banner hidden">
+    <div class="banner-content">
+      <span>📱 れいのToDoをホーム画面に追加して、いつでも一緒にいよ〜♡</span>
+      <div class="banner-buttons">
+        <button id="install-button" class="install-btn">追加する💖</button>
+        <button id="dismiss-banner" class="dismiss-btn">後で</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="app-container">
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <div class="rei-sparkle">
+        <h1>💖 れいのToDo 💖</h1>
+        <p class="subtitle">一緒に頑張ろうね〜✨</p>
+      </div>
+    </header>
+    
+    <!-- れいのステータス -->
+    <div class="rei-status" id="rei-status">
+      <div class="rei-avatar">
+        <div class="rei-face">
+          <img src="icons/icon-192.png" alt="れいちゃん" class="rei-face-image">
+        </div>
+      </div>
+      <div class="status-text">
+        <span id="rei-mood">今日も一緒に頑張ろうね〜♡</span>
+        <div class="streak-display" id="streak-display">
+          <div class="streak-counter">
+            🔥 <span id="streak-count">0</span>日連続
+          </div>
+          <div class="streak-best">
+            🏆 最高記録: <span id="streak-best">0</span>日
+          </div>
+        </div>
+        <div class="exp-display" id="exp-display">
+          <div class="level-info">
+            <span class="level-badge">Lv.<span id="current-level">1</span></span>
+            <span class="exp-text"><span id="current-exp">0</span>/<span id="exp-to-next">100</span> EXP</span>
+          </div>
+          <div class="exp-bar">
+            <div class="exp-fill" id="exp-fill"></div>
+          </div>
+        </div>
+        <div class="badge-display" id="badge-display">
+          <div class="current-badge" id="current-badge">
+            <span class="badge-icon">🌸</span>
+            <span class="badge-title">れいとの出会い</span>
+          </div>
+          <div class="settings-buttons">
+            <button class="badge-settings-btn" id="badge-settings-btn">🏅 称号</button>
+            <button class="theme-settings-btn" id="theme-settings-btn">🎨 テーマ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- タスク追加フォーム -->
+    <form id="todo-form" class="todo-form">
+      <div class="input-group">
+        <input type="text" id="todo-input" placeholder="れいと一緒に今日なにする？" required />
+      </div>
+      
+      <div class="datetime-container">
+        <label for="due-date">📅 期限:</label>
+        <input type="date" id="due-date" />
+        <input type="time" id="due-time" />
+        <button type="button" id="clear-datetime" class="clear-btn">クリア</button>
+      </div>
+      
+      <div class="repeat-container">
+        <label for="repeat-type">🔄 繰り返し:</label>
+        <select id="repeat-type">
+          <option value="none">なし</option>
+          <option value="daily">毎日</option>
+          <option value="weekly">毎週</option>
+          <option value="monthly">毎月</option>
+        </select>
+        <div class="repeat-info" id="repeat-info">
+          <small>📅 次回: <span id="next-repeat-date">-</span></small>
+        </div>
+      </div>
+      
+      <button type="submit" class="add-btn">
+        <span>✨ 追加 ✨</span>
+      </button>
+    </form>
+    
+    <!-- タスクリスト -->
+    <div class="todo-container">
+      <div class="list-header">
+        <h2>📝 タスクリスト</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+          <span class="progress-text" id="progress-text">0%</span>
+        </div>
+      </div>
+      <ul id="todo-list" class="todo-list"></ul>
+      
+      <!-- 空の状態 -->
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon">🌸</div>
+        <p>まだタスクがないよ〜</p>
+        <p>れいと一緒に何から始める？</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- テーマ設定モーダル -->
+  <div id="theme-modal" class="theme-modal hidden">
+    <div class="theme-modal-content">
+      <div class="theme-modal-header">
+        <h3>🎨 テーマコレクション</h3>
+        <button class="theme-modal-close" id="theme-modal-close">×</button>
+      </div>
+      <div class="theme-modal-body">
+        <div class="theme-info">
+          <h4>💡 テーマについて</h4>
+          <p>レベルが上がると新しいテーマが解放されるよ〜♪<br>
+          れいちゃんと一緒にいろんな世界を体験しよう！</p>
+        </div>
+        <div class="theme-collection">
+          <h4>🌈 利用可能なテーマ</h4>
+          <div class="theme-grid" id="theme-grid">
+            <!-- テーマがここに動的に追加されます -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- バッジ設定モーダル -->
+  <div id="badge-modal" class="badge-modal hidden">
+    <div class="badge-modal-content">
+      <div class="badge-modal-header">
+        <h3>🏅 称号コレクション</h3>
+        <button class="badge-modal-close" id="badge-modal-close">×</button>
+      </div>
+      <div class="badge-modal-body">
+        <div class="badge-stats">
+          <h4>📊 れいとの絆の記録</h4>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">総タスク完了</span>
+              <span class="stat-value" id="total-completed">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">最長ストリーク</span>
+              <span class="stat-value" id="max-streak">0日</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">現在のレベル</span>
+              <span class="stat-value" id="current-level-display">1</span>
+            </div>
+          </div>
+        </div>
+        <div class="badge-collection">
+          <h4>🏆 獲得した称号</h4>
+          <div class="badge-grid" id="badge-grid">
+            <!-- バッジがここに動的に追加されます -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- オフライン通知 -->
+  <div id="offline-notice" class="offline-notice hidden">
+    <span>📵 オフラインモード - データはローカルに保存されます</span>
+  </div>
+
+  <!-- JavaScriptファイル -->
+  <script src="app.js"></script>
+</body>
+</html>

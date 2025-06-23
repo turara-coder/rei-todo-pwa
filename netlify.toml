@@ -1,0 +1,31 @@
+[build]
+  publish = "."
+
+# Service Workerのキャッシュ制御
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/sw-deploy.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# PWAマニフェストの設定
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+# モジュールファイルの設定
+[[headers]]
+  for = "/js/modules/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+# アイコンファイルの最適化
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
