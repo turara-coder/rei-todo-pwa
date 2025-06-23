@@ -53,6 +53,14 @@ document.addEventListener('DOMContentLoaded', function() {
         currentTheme: 'default',
         unlockedThemes: ['default']
     };
+    
+    // 完了タスクカウンターのデータ
+    let completionData = {
+        todayCompleted: 0,
+        totalCompleted: 0,
+        dailyCompletions: {},
+        lastResetDate: null
+    };
 
     const themeDefinitions = {
         default: {
@@ -239,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             addExp(10);
             updateStreakOnCompletion();
             updateDailyTaskRecord();
+            updateCompletionCounter(); // 完了カウンター更新
             
             setTimeout(() => {
                 checkAndUnlockBadges();
@@ -468,6 +477,91 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }
     }
+
+    // ========== 完了カウンター関数 ==========
+    function updateCompletionCounter() {
+        const today = new Date().toDateString();
+        
+        // 日付が変わったらリセット
+        if (completionData.lastResetDate !== today) {
+            completionData.todayCompleted = 0;
+            completionData.lastResetDate = today;
+        }
+        
+        // 今日の完了数を増加
+        completionData.todayCompleted++;
+        completionData.totalCompleted++;
+        
+        // 日別記録を保存
+        if (!completionData.dailyCompletions[today]) {
+            completionData.dailyCompletions[today] = 0;
+        }
+        completionData.dailyCompletions[today]++;
+        
+        // 表示を更新
+        updateCompletionDisplay();
+        
+        // データを保存
+        saveCompletionData();
+        
+        // 達成メッセージ
+        showCompletionMessage();
+    }
+    
+    function updateCompletionDisplay() {
+        const todayElement = document.getElementById('today-completed-count');
+        const totalElement = document.getElementById('total-completed-count');
+        
+        if (todayElement) {
+            todayElement.textContent = completionData.todayCompleted;
+        }
+        if (totalElement) {
+            totalElement.textContent = completionData.totalCompleted;
+        }
+    }
+    
+    function showCompletionMessage() {
+        const today = completionData.todayCompleted;
+        const total = completionData.totalCompleted;
+        
+        // 特別な数字での祝福メッセージ
+        if (today === 5) {
+            showReiMessage('今日5個も完了〜♡ 頑張ってるね〜✨');
+        } else if (today === 10) {
+            showReiMessage('今日10個完了〜！すごいじゃない〜♪');
+        } else if (total % 50 === 0 && total > 0) {
+            showReiMessage(`総完了数${total}個達成〜♡ れい感動しちゃう〜✨`);
+        } else if (total % 100 === 0 && total > 0) {
+            showReiMessage(`🎉 総完了数${total}個の大台達成〜！れいも誇らしいよ〜♡`);
+        }
+    }
+    
+    function resetDailyCompletion() {
+        const today = new Date().toDateString();
+        if (completionData.lastResetDate !== today) {
+            completionData.todayCompleted = 0;
+            completionData.lastResetDate = today;
+            updateCompletionDisplay();
+            saveCompletionData();
+        }
+    }
+    
+    function saveCompletionData() {
+        localStorage.setItem('completionData', JSON.stringify(completionData));
+    }
+    
+    function loadCompletionData() {
+        const saved = localStorage.getItem('completionData');
+        if (saved) {
+            completionData = { ...completionData, ...JSON.parse(saved) };
+        }
+        
+        // 日付が変わっていたらリセット
+        resetDailyCompletion();
+        updateCompletionDisplay();
+    }
+
+    // ...existing code...
 
     // ========== データ管理関数 ==========
     function getStreakData() {
@@ -1502,6 +1596,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRepeatSystem();
     initializeBadgeSystem();
     initializeThemeSystem();
+    loadCompletionData(); // 完了カウンターデータ読み込み
     
     // イベントリスナーの設定
     setupEventListeners();

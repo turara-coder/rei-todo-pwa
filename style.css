@@ -128,9 +128,37 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-@keyframes streakPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+/* 完了タスクカウンター */
+.completion-counter {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.today-completed {
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  animation: completionGlow 2s ease-in-out infinite alternate;
+}
+
+.total-completed {
+  background: linear-gradient(45deg, #9b59b6, #e74c3c);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@keyframes completionGlow {
+  from { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  to { box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); }
 }
 
 .exp-display {
