@@ -549,11 +549,18 @@ body {
   touch-action: manipulation;
   user-select: text;
   -webkit-user-select: text;
+  /* 強制的にフォーカス可能にする */
+  pointer-events: auto;
+  cursor: text;
+  z-index: 10;
+  position: relative;
 }
 
 #todo-input:focus {
   border-color: #74b9ff;
   box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.1);
+  /* フォーカス時の強調 */
+  transform: scale(1.02);
 }
 
 /* モバイルデバイス対応 */
@@ -561,6 +568,13 @@ body {
   #todo-input {
     font-size: 16px; /* iOS Safariのズーム防止 */
     padding: 14px 18px;
+    min-height: 48px; /* タッチターゲットサイズ */
+    box-sizing: border-box;
+  }
+  
+  .input-group {
+    position: relative;
+    z-index: 10;
   }
 }
 

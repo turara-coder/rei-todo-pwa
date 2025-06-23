@@ -99,6 +99,11 @@
     
     <!-- タスク追加フォーム -->
     <form id="todo-form" class="todo-form">
+      <!-- スマホ用注意書き -->
+      <div class="mobile-input-help" id="mobile-input-help" style="display: none;">
+        <p>📱 入力できない場合は、下の入力欄を長押しまたは複数回タップしてください</p>
+      </div>
+      
       <div class="input-group">
         <input type="text" 
                id="todo-input" 
@@ -107,6 +112,9 @@
                autocapitalize="sentences"
                spellcheck="true"
                inputmode="text"
+               enterkeyhint="done"
+               data-focusable="true"
+               tabindex="0"
                required />
       </div>
       

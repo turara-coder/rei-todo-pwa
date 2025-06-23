@@ -1533,19 +1533,29 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // スマホ対応: 入力フィールドのタップ処理
+        // スマホ対応: 入力フィールドの強制アクティベーション
         if (todoInput) {
-            todoInput.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                this.focus();
-                setTimeout(() => {
-                    this.click();
-                }, 10);
-            }, { passive: false });
+            // 複数のイベントで確実にフォーカス
+            const focusInput = () => {
+                todoInput.focus();
+                todoInput.click();
+                // 仮想キーボードを強制表示
+                if (todoInput.setSelectionRange) {
+                    todoInput.setSelectionRange(0, 0);
+                }
+            };
             
-            todoInput.addEventListener('click', function(e) {
-                this.focus();
-            });
+            todoInput.addEventListener('touchstart', focusInput, { passive: true });
+            todoInput.addEventListener('touchend', focusInput, { passive: true });
+            todoInput.addEventListener('click', focusInput);
+            todoInput.addEventListener('mousedown', focusInput);
+            
+            // 入力フィールドの親要素をクリックしても入力フィールドにフォーカス
+            const inputGroup = document.querySelector('.input-group');
+            if (inputGroup) {
+                inputGroup.addEventListener('click', focusInput);
+                inputGroup.addEventListener('touchstart', focusInput, { passive: true });
+            }
         }
 
         // PWAインストール関連
@@ -1622,15 +1632,40 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeThemeSystem();
     loadCompletionData(); // 完了カウンターデータ読み込み
     
-    // スマホ対応: 初期フォーカス設定
-    setTimeout(() => {
-        if (todoInput && document.readyState === 'complete') {
-            // タッチデバイスでない場合のみ自動フォーカス
-            if (!('ontouchstart' in window)) {
-                todoInput.focus();
+    // スマホ対応: 初期フォーカス設定（改善版）
+    const initializeMobileInput = () => {
+        if (todoInput) {
+            console.log('Mobile input initialization');
+            // デスクトップでのみ自動フォーカス
+            if (!window.matchMedia('(max-width: 768px)').matches) {
+                setTimeout(() => todoInput.focus(), 100);
             }
+            
+            // スマホでも入力可能にするための設定
+            todoInput.removeAttribute('readonly');
+            todoInput.disabled = false;
+            todoInput.style.pointerEvents = 'auto';
+            
+            // デバッグ用
+            todoInput.addEventListener('focus', () => {
+                console.log('Input focused!');
+                todoInput.style.borderColor = '#00ff00';
+            });
+            
+            todoInput.addEventListener('blur', () => {
+                console.log('Input blurred!');
+                todoInput.style.borderColor = '#ddd';
+            });
         }
-    }, 500);
+    };
+    
+    // DOM完全読み込み後に実行
+    if (document.readyState === 'complete') {
+        initializeMobileInput();
+    } else {
+        window.addEventListener('DOMContentLoaded', initializeMobileInput);
+        window.addEventListener('load', initializeMobileInput);
+    }
 
     // イベントリスナーの設定
     setupEventListeners();
