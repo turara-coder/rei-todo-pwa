@@ -158,20 +158,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function showReiToast(message, duration = 5000) {
         if (!reiToast || !reiToastMessage) return;
         
-        // 既存のトーストがあれば閉じる
-        hideReiToast();
+        // 既存のタイマーをクリア
+        if (reiToast.hideTimeout) {
+            clearTimeout(reiToast.hideTimeout);
+            reiToast.hideTimeout = null;
+        }
+        if (reiToast.showTimeout) {
+            clearTimeout(reiToast.showTimeout);
+            reiToast.showTimeout = null;
+        }
         
         // メッセージを設定
         reiToastMessage.textContent = message;
         
-        // トーストを表示
+        // トーストを即座に表示状態にする
         reiToast.classList.remove('hidden');
-        setTimeout(() => {
-            reiToast.classList.add('show');
-        }, 50);
+        reiToast.classList.add('show');
         
-        // 自動で非表示
-        clearTimeout(reiToast.hideTimeout);
+        // 設定時間後に自動で非表示
         reiToast.hideTimeout = setTimeout(() => {
             hideReiToast();
         }, duration);
@@ -180,12 +184,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideReiToast() {
         if (!reiToast) return;
         
-        reiToast.classList.remove('show');
-        setTimeout(() => {
-            reiToast.classList.add('hidden');
-        }, 300);
+        // 既存のタイマーをクリア
+        if (reiToast.hideTimeout) {
+            clearTimeout(reiToast.hideTimeout);
+            reiToast.hideTimeout = null;
+        }
+        if (reiToast.showTimeout) {
+            clearTimeout(reiToast.showTimeout);
+            reiToast.showTimeout = null;
+        }
         
-        clearTimeout(reiToast.hideTimeout);
+        // アニメーション付きで非表示
+        reiToast.classList.remove('show');
+        reiToast.showTimeout = setTimeout(() => {
+            reiToast.classList.add('hidden');
+        }, 300); // CSS transition時間と合わせる
     }
 
     function loadTodos() {
