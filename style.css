@@ -539,6 +539,35 @@ body {
   }
 }
 
+/* 経験値・レベルアップ アニメーション */
+@keyframes expFloat {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes levelUpPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); color: #f39c12; }
+  100% { transform: scale(1); }
+}
+
+@keyframes messageFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes streakPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 /* モバイル対応 */
 @media (max-width: 480px) {
   .rei-toast {
