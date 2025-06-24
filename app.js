@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusBtn = document.getElementById('status-btn');
     const statusModal = document.getElementById('status-modal');
     const statusModalClose = document.getElementById('status-modal-close');
+    const reiToast = document.getElementById('rei-toast');
+    const reiToastMessage = document.getElementById('rei-toast-message');
+    const reiToastClose = document.getElementById('rei-toast-close');
     const currentBadgeElement = document.getElementById('current-badge');
     const emptyState = document.getElementById('empty-state');
     const progressFill = document.getElementById('progress-fill');
@@ -125,7 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // ========== 基本関数 ==========
-    function showReiMessage(message, duration = 3000) {
+    function showReiMessage(message, duration = 4000) {
+        // 旧バージョンのメッセージ表示も保持（フォールバック）
         const reiMood = document.getElementById('rei-mood');
         if (reiMood) {
             const originalMessage = reiMood.textContent;
@@ -137,6 +141,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 reiMood.textContent = originalMessage;
             }, duration);
         }
+        
+        // 新しいトーストメッセージ表示
+        showReiToast(message, duration);
+    }
+    
+    function showReiToast(message, duration = 4000) {
+        if (!reiToast || !reiToastMessage) return;
+        
+        // 既存のトーストがあれば閉じる
+        hideReiToast();
+        
+        // メッセージを設定
+        reiToastMessage.textContent = message;
+        
+        // トーストを表示
+        reiToast.classList.remove('hidden');
+        setTimeout(() => {
+            reiToast.classList.add('show');
+        }, 50);
+        
+        // 自動で非表示
+        clearTimeout(reiToast.hideTimeout);
+        reiToast.hideTimeout = setTimeout(() => {
+            hideReiToast();
+        }, duration);
+    }
+    
+    function hideReiToast() {
+        if (!reiToast) return;
+        
+        reiToast.classList.remove('show');
+        setTimeout(() => {
+            reiToast.classList.add('hidden');
+        }, 300);
+        
+        clearTimeout(reiToast.hideTimeout);
     }
 
     function loadTodos() {
@@ -192,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         
         const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-        showReiMessage(randomMessage);
+        showReiMessage(randomMessage, 3000); // タスク追加メッセージは標準時間
     }
 
     function displayTodos() {
@@ -267,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 '素晴らしい〜✨ その調子だよ〜♪'
             ];
             const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
-            showReiMessage(randomMessage);
+            showReiMessage(randomMessage, 3500); // 完了メッセージは少し長く表示
         }
         
         saveTodos();
@@ -805,17 +845,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     todoForm.reset();
                     updateNextRepeatDate();
                     
-                    // スマホ対応のフォーカス処理
-                    setTimeout(() => {
-                        if (todoInput) {
-                            todoInput.focus();
-                            // iOS Safari対応
-                            if (window.navigator.userAgent.includes('Safari') && 
-                                window.navigator.userAgent.includes('iPhone')) {
-                                todoInput.click();
-                            }
-                        }
-                    }, 100);
+                    // タスク登録後はフォーカスしない（キーボード表示を防ぐ）
+                    if (todoInput) {
+                        todoInput.blur(); // フォーカスを外す
+                    }
                 }
             });
         }
@@ -903,6 +936,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (statusModal) {
             statusModal.addEventListener('click', (e) => {
                 if (e.target === statusModal) hideStatusModal();
+            });
+        }
+        
+        // れいトースト関連
+        if (reiToastClose) {
+            reiToastClose.addEventListener('click', hideReiToast);
+        }
+        if (reiToast) {
+            reiToast.addEventListener('click', (e) => {
+                if (e.target === reiToast) hideReiToast();
             });
         }
     }
