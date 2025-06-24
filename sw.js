@@ -1,5 +1,5 @@
 // れいのToDo PWA - Service Worker
-const CACHE_NAME = 'rei-todo-v17';
+const CACHE_NAME = 'rei-todo-v18';
 const urlsToCache = [
     '/',
     '/index.html',

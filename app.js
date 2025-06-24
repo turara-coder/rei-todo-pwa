@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // ========== 基本関数 ==========
-    function showReiMessage(message, duration = 4000) {
+    function showReiMessage(message, duration = 5000) {
         // 旧バージョンのメッセージ表示も保持（フォールバック）
         const reiMood = document.getElementById('rei-mood');
         if (reiMood) {
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showReiToast(message, duration);
     }
     
-    function showReiToast(message, duration = 4000) {
+    function showReiToast(message, duration = 5000) {
         if (!reiToast || !reiToastMessage) return;
         
         // 既存のトーストがあれば閉じる
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         
         const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-        showReiMessage(randomMessage, 3000); // タスク追加メッセージは標準時間
+        showReiMessage(randomMessage, 5000); // タスク追加メッセージ
     }
 
     function displayTodos() {
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 '素晴らしい〜✨ その調子だよ〜♪'
             ];
             const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
-            showReiMessage(randomMessage, 3500); // 完了メッセージは少し長く表示
+            showReiMessage(randomMessage, 5000); // 完了メッセージ
         }
         
         saveTodos();
