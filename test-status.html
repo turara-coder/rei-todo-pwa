@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ステータスボタンテスト</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="rei-status" id="rei-status">
+      <div class="rei-avatar">
+        <div class="rei-face">
+          <img src="icons/icon-192.png" alt="れいちゃん" class="rei-face-image">
+        </div>
+      </div>
+      <div class="status-text">
+        <span id="rei-mood">今日も一緒に頑張ろうね〜♡</span>
+        <div class="streak-display" id="streak-display">
+          <div class="streak-counter">
+            🔥 <span id="streak-count">0</span>日連続
+          </div>
+          <button class="status-btn" id="status-btn">📊 ステータス</button>
+        </div>
+        <!-- 完了タスクカウンター -->
+        <div class="completion-counter" id="completion-counter">
+          <div class="today-completed">
+            ✅ 今日完了: <span id="today-completed-count">0</span>個
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ステータスモーダル -->
+  <div id="status-modal" class="status-modal hidden">
+    <div class="status-modal-content">
+      <div class="status-modal-header">
+        <h3>📊 れいとの活動記録</h3>
+        <button class="status-modal-close" id="status-modal-close">×</button>
+      </div>
+      <div class="status-modal-body">
+        <p>テスト用モーダル</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusBtn = document.getElementById('status-btn');
+      const statusModal = document.getElementById('status-modal');
+      const statusModalClose = document.getElementById('status-modal-close');
+      
+      console.log('ステータスボタン:', statusBtn);
+      console.log('ステータスモーダル:', statusModal);
+      
+      if (statusBtn) {
+        statusBtn.addEventListener('click', function() {
+          console.log('ステータスボタンがクリックされました');
+          if (statusModal) {
+            statusModal.classList.remove('hidden');
+          }
+        });
+      }
+      
+      if (statusModalClose) {
+        statusModalClose.addEventListener('click', function() {
+          if (statusModal) {
+            statusModal.classList.add('hidden');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

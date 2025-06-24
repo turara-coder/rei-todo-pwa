@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>キャッシュクリア</title>
+</head>
+<body>
+  <h1>キャッシュクリア</h1>
+  <button onclick="clearCache()">キャッシュをクリア</button>
+  <button onclick="reloadApp()">アプリを再読み込み</button>
+  <div id="status"></div>
+  
+  <script>
+    async function clearCache() {
+      try {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = 'キャッシュクリア中...';
+        
+        // Service Worker キャッシュをクリア
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            console.log('キャッシュを削除:', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+        
+        // Service Worker を unregister
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(registration => registration.unregister()));
+        }
+        
+        statusDiv.innerHTML = 'キャッシュをクリアしました！';
+        
+        // ローカルストレージもクリア（必要に応じて）
+        // localStorage.clear();
+        // sessionStorage.clear();
+        
+      } catch (error) {
+        console.error('キャッシュクリアエラー:', error);
+        document.getElementById('status').innerHTML = 'エラー: ' + error.message;
+      }
+    }
+    
+    function reloadApp() {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

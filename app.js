@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusBtn = document.getElementById('status-btn');
     const statusModal = document.getElementById('status-modal');
     const statusModalClose = document.getElementById('status-modal-close');
+    
+    // デバッグ: ステータスボタンの存在確認
+    console.log('ステータスボタン要素:', statusBtn);
+    console.log('ステータスモーダル要素:', statusModal);
+    if (!statusBtn) {
+        console.error('ステータスボタンが見つかりません!');
+    } else {
+        console.log('ステータスボタンが正常に取得されました');
+    }
     const reiToast = document.getElementById('rei-toast');
     const reiToastMessage = document.getElementById('rei-toast-message');
     const reiToastClose = document.getElementById('rei-toast-close');
