@@ -817,6 +817,242 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== 初期化関数群 ==========
+    function initializePWA() {
+        // PWA関連の初期化
+        if (localStorage.getItem('installBannerDismissed') === 'true') {
+            hideInstallBanner();
+        }
+        
+        // オンライン状態の初期確認
+        if (!isOnline) {
+            showOfflineNotice();
+        }
+    }
+    
+    function checkOnlineStatus() {
+        // オンライン状態をチェック
+        isOnline = navigator.onLine;
+        if (isOnline) {
+            hideOfflineNotice();
+        } else {
+            showOfflineNotice();
+        }
+    }
+    
+    function initializeStreak() {
+        const saved = localStorage.getItem('streakData');
+        if (saved) {
+            streakData = { ...streakData, ...JSON.parse(saved) };
+        }
+        updateStreakDisplay();
+    }
+    
+    function updateStreakDisplay() {
+        const streakElement = document.getElementById('streak-count');
+        if (streakElement) {
+            streakElement.textContent = streakData.current;
+        }
+    }
+    
+    function updateStreakOnCompletion() {
+        const today = new Date().toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+        
+        if (streakData.lastCompletionDate === today) {
+            // 今日既に完了済み（連続記録は変わらず）
+            return;
+        } else if (streakData.lastCompletionDate === yesterdayStr) {
+            // 昨日完了していた場合、連続記録を継続
+            streakData.current++;
+        } else {
+            // 連続記録が途切れた場合、リセット
+            streakData.current = 1;
+        }
+        
+        // 最高記録を更新
+        if (streakData.current > streakData.best) {
+            streakData.best = streakData.current;
+        }
+        
+        streakData.lastCompletionDate = today;
+        localStorage.setItem('streakData', JSON.stringify(streakData));
+        updateStreakDisplay();
+    }
+    
+    function initializeExpSystem() {
+        const saved = localStorage.getItem('expData');
+        if (saved) {
+            expData = { ...expData, ...JSON.parse(saved) };
+        }
+        updateExpDisplay();
+    }
+    
+    function updateExpDisplay() {
+        const levelElement = document.getElementById('current-level');
+        const expElement = document.getElementById('current-exp');
+        const expToNextElement = document.getElementById('exp-to-next');
+        const expFillElement = document.getElementById('exp-fill');
+        
+        if (levelElement) levelElement.textContent = expData.currentLevel;
+        if (expElement) expElement.textContent = expData.currentExp;
+        
+        const expToNext = expData.currentLevel * 100;
+        if (expToNextElement) expToNextElement.textContent = expToNext;
+        
+        if (expFillElement) {
+            const percentage = (expData.currentExp / expToNext) * 100;
+            expFillElement.style.width = `${percentage}%`;
+        }
+    }
+    
+    function addExp(amount) {
+        expData.currentExp += amount;
+        expData.totalExp += amount;
+        
+        const expToNext = expData.currentLevel * 100;
+        
+        if (expData.currentExp >= expToNext) {
+            // レベルアップ
+            expData.currentLevel++;
+            expData.currentExp -= expToNext;
+            
+            showReiMessage(`🎉 レベルアップ！Lv.${expData.currentLevel}になったよ〜♡`);
+            
+            // レベルアップ時のエフェクト
+            const levelElement = document.getElementById('current-level');
+            if (levelElement) {
+                levelElement.style.animation = 'levelUpPulse 1s ease-out';
+                setTimeout(() => {
+                    levelElement.style.animation = '';
+                }, 1000);
+            }
+        }
+        
+        localStorage.setItem('expData', JSON.stringify(expData));
+        updateExpDisplay();
+    }
+    
+    function initializeRepeatSystem() {
+        // 繰り返しタスクの初期化
+        updateNextRepeatDate();
+    }
+    
+    function initializeBadgeSystem() {
+        const saved = localStorage.getItem('badgeData');
+        if (saved) {
+            badgeData = { ...badgeData, ...JSON.parse(saved) };
+        }
+        updateBadgeDisplay();
+    }
+    
+    function updateBadgeDisplay() {
+        const badgeElement = document.getElementById('current-badge');
+        if (!badgeElement) return;
+        
+        const badges = getBadgeDefinitions();
+        const currentBadge = badges.find(b => b.id === badgeData.selectedBadge);
+        
+        if (currentBadge) {
+            const iconElement = badgeElement.querySelector('.badge-icon');
+            const titleElement = badgeElement.querySelector('.badge-title');
+            
+            if (iconElement) iconElement.textContent = currentBadge.icon;
+            if (titleElement) titleElement.textContent = currentBadge.title;
+        }
+    }
+    
+    function getBadgeDefinitions() {
+        return [
+            {
+                id: 'first_meeting',
+                title: 'れいとの出会い',
+                icon: '🌸',
+                description: 'れいちゃんとの最初の出会い',
+                condition: () => true
+            },
+            {
+                id: 'first_task',
+                title: '初めの一歩',
+                icon: '👣',
+                description: '最初のタスクを完了',
+                condition: () => completionData.totalCompleted >= 1
+            },
+            {
+                id: 'task_master_10',
+                title: 'タスクマスター',
+                icon: '⭐',
+                description: '10個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 10
+            }
+        ];
+    }
+    
+    function getBadgeData() {
+        return badgeData;
+    }
+    
+    function saveBadgeData(data) {
+        badgeData = data;
+        localStorage.setItem('badgeData', JSON.stringify(badgeData));
+    }
+    
+    function checkAndUnlockBadges() {
+        const badges = getBadgeDefinitions();
+        let newBadges = [];
+        
+        badges.forEach(badge => {
+            if (!badgeData.unlockedBadges.includes(badge.id) && badge.condition()) {
+                badgeData.unlockedBadges.push(badge.id);
+                newBadges.push(badge);
+            }
+        });
+        
+        if (newBadges.length > 0) {
+            saveBadgeData(badgeData);
+            newBadges.forEach(badge => {
+                showReiMessage(`🏆 新しい称号「${badge.title}」を獲得したよ〜♡`);
+            });
+        }
+    }
+    
+    function initializeThemeSystem() {
+        const saved = localStorage.getItem('themeData');
+        if (saved) {
+            themeData = { ...themeData, ...JSON.parse(saved) };
+        }
+        applyCurrentTheme();
+    }
+    
+    function applyCurrentTheme() {
+        document.body.className = `theme-${themeData.currentTheme}`;
+    }
+    
+    function saveThemeData() {
+        localStorage.setItem('themeData', JSON.stringify(themeData));
+    }
+    
+    function updateDailyTaskRecord() {
+        const today = new Date().toDateString();
+        if (!badgeData.stats.dailyTasksCompleted[today]) {
+            badgeData.stats.dailyTasksCompleted[today] = 0;
+        }
+        badgeData.stats.dailyTasksCompleted[today]++;
+        saveBadgeData(badgeData);
+    }
+    
+    function updateBadgeStats() {
+        const totalElement = document.getElementById('total-completed');
+        const streakElement = document.getElementById('max-streak');
+        const levelElement = document.getElementById('current-level-display');
+        
+        if (totalElement) totalElement.textContent = completionData.totalCompleted;
+        if (streakElement) streakElement.textContent = streakData.best + '日';
+        if (levelElement) levelElement.textContent = expData.currentLevel;
+    }
+
     // ========== イベントリスナー設定 ==========
     function setupEventListeners() {
         // 日時クリアボタン
