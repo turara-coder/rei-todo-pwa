@@ -62,17 +62,12 @@
           <div class="streak-counter">
             🔥 <span id="streak-count">0</span>日連続
           </div>
-          <div class="streak-best">
-            🏆 最高記録: <span id="streak-best">0</span>日
-          </div>
+          <button class="status-btn" id="status-btn">📊 ステータス</button>
         </div>
         <!-- 完了タスクカウンター -->
         <div class="completion-counter" id="completion-counter">
           <div class="today-completed">
             ✅ 今日完了: <span id="today-completed-count">0</span>個
-          </div>
-          <div class="total-completed">
-            🎯 総完了数: <span id="total-completed-count">0</span>個
           </div>
         </div>
         <div class="exp-display" id="exp-display">
@@ -99,11 +94,6 @@
     
     <!-- タスク追加フォーム -->
     <form id="todo-form" class="todo-form">
-      <!-- スマホ用注意書き -->
-      <div class="mobile-input-help" id="mobile-input-help" style="display: none;">
-        <p>📱 入力できない場合は、下の入力欄を長押しまたは複数回タップしてください</p>
-      </div>
-      
       <div class="input-group">
         <input type="text" 
                id="todo-input" 
@@ -112,9 +102,6 @@
                autocapitalize="sentences"
                spellcheck="true"
                inputmode="text"
-               enterkeyhint="done"
-               data-focusable="true"
-               tabindex="0"
                required />
       </div>
       
@@ -220,7 +207,90 @@
       </div>
     </div>
   </div>
-
+  
+  <!-- ステータスモーダル -->
+  <div id="status-modal" class="status-modal hidden">
+    <div class="status-modal-content">
+      <div class="status-modal-header">
+        <h3>📊 れいとの活動記録</h3>
+        <button class="status-modal-close" id="status-modal-close">×</button>
+      </div>
+      <div class="status-modal-body">
+        <div class="stats-section">
+          <h4>🏆 達成記録</h4>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🎯</div>
+              <div class="stat-info">
+                <div class="stat-label">総完了数</div>
+                <div class="stat-value" id="modal-total-completed">0</div>
+                <div class="stat-desc">今までのがんばり</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-info">
+                <div class="stat-label">最高記録</div>
+                <div class="stat-value" id="modal-streak-best">0日</div>
+                <div class="stat-desc">連続完了の記録</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-info">
+                <div class="stat-label">今日完了</div>
+                <div class="stat-value" id="modal-today-completed">0</div>
+                <div class="stat-desc">今日のがんばり</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📅</div>
+              <div class="stat-info">
+                <div class="stat-label">活動日数</div>
+                <div class="stat-value" id="modal-active-days">0日</div>
+                <div class="stat-desc">れいとの日々</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-section">
+          <h4>📈 成長記録</h4>
+          <div class="level-stats">
+            <div class="level-card">
+              <div class="level-icon">⭐</div>
+              <div class="level-info">
+                <div class="level-label">現在レベル</div>
+                <div class="level-value" id="modal-current-level">1</div>
+              </div>
+            </div>
+            <div class="exp-info">
+              <div class="exp-label">経験値</div>
+              <div class="exp-progress">
+                <div class="exp-bar-container">
+                  <div class="exp-bar-fill" id="modal-exp-fill"></div>
+                </div>
+                <div class="exp-text">
+                  <span id="modal-current-exp">0</span>/<span id="modal-exp-to-next">100</span> EXP
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rei-message-section">
+          <div class="rei-comment">
+            <div class="rei-avatar-small">
+              <img src="icons/icon-192.png" alt="れいちゃん">
+            </div>
+            <div class="rei-speech">
+              <span id="status-rei-message">れいと一緒にがんばってくれてありがとう〜♡</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- オフライン通知 -->
