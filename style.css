@@ -23,6 +23,7 @@ body {
   margin: 0 auto;
   padding: 1rem;
   min-height: 100vh;
+  position: relative;
 }
 
 /* ヘッダー */
@@ -49,6 +50,242 @@ body {
 @keyframes sparkle {
   0% { transform: scale(1); }
   100% { transform: scale(1.05); }
+}
+
+/* ハンバーガーメニュー */
+.hamburger-menu {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .hamburger-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .menu-content {
+    width: 95%;
+    max-height: 85vh;
+  }
+  
+  .menu-items {
+    padding: 15px;
+    gap: 12px;
+  }
+  
+  .menu-item {
+    padding: 12px 15px;
+  }
+  
+  .menu-icon {
+    font-size: 1.3rem;
+    width: 35px;
+  }
+  
+  .menu-text {
+    font-size: 0.9rem;
+  }
+}
+
+.hamburger-btn {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-btn.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.menu-content {
+  background: white;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.menu-overlay.active .menu-content {
+  transform: scale(1);
+}
+
+.menu-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.menu-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.menu-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-items {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menu-item {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: none;
+  border-radius: 15px;
+  padding: 15px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.menu-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+
+.menu-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 特定メニューアイテムの色調整 */
+.menu-item:nth-child(1) {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+}
+
+.menu-item:nth-child(2) {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+}
+
+.menu-item:nth-child(2) .menu-text {
+  color: white;
+}
+
+.menu-item:nth-child(3) {
+  background: linear-gradient(135deg, #feca57 0%, #ff6b6b 100%);
+}
+
+.menu-item:nth-child(3) .menu-text {
+  color: white;
+}
+
+.menu-item:nth-child(4) {
+  background: linear-gradient(135deg, #ff6ec7 0%, #ff61d2 100%);
+}
+
+.menu-item:nth-child(4) .menu-text {
+  color: white;
+}
+
+.menu-item:nth-child(5) {
+  background: linear-gradient(135deg, #55a3ff 0%, #3742fa 100%);
+}
+
+.menu-item:nth-child(5) .menu-text {
+  color: white;
 }
 
 /* れいのステータス */
@@ -627,51 +864,7 @@ body {
   font-size: 1rem;
 }
 
-.settings-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.badge-settings-btn,
-.theme-settings-btn,
-.weather-settings-btn,
-.anniversary-settings-btn,
-.notification-settings-btn {
-  background: linear-gradient(45deg, #a55eea, #26de81);
-  color: white;
-  border: none;
-  padding: 6px 8px;
-  border-radius: 10px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.theme-settings-btn {
-  background: linear-gradient(45deg, #74b9ff, #0984e3);
-}
-
-.weather-settings-btn {
-  background: linear-gradient(45deg, #feca57, #ff6b6b);
-}
-
-.anniversary-settings-btn {
-  background: linear-gradient(45deg, #ff6ec7, #ff61d2);
-}
-
-.notification-settings-btn {
-  background: linear-gradient(45deg, #55a3ff, #3742fa);
-}
-
-.badge-settings-btn:hover,
-.theme-settings-btn:hover,
-.weather-settings-btn:hover,
-.anniversary-settings-btn:hover,
-.notification-settings-btn:hover {
-  transform: scale(1.05);
-}
+/* 旧設定ボタンスタイルは削除（ハンバーガーメニューに移動） */
 
 @keyframes badgeGlow {
   0%, 100% { box-shadow: 0 0 5px rgba(253, 121, 168, 0.3); }

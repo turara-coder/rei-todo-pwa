@@ -16,12 +16,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearDatetimeBtn = document.getElementById('clear-datetime');
     const repeatTypeSelect = document.getElementById('repeat-type');
     const nextRepeatDateSpan = document.getElementById('next-repeat-date');
+    
+    // ハンバーガーメニュー要素
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuClose = document.getElementById('menu-close');
+    
+    // 設定関連の要素
     const badgeSettingsBtn = document.getElementById('badge-settings-btn');
     const badgeModal = document.getElementById('badge-modal');
     const badgeModalClose = document.getElementById('badge-modal-close');
     const themeSettingsBtn = document.getElementById('theme-settings-btn');
     const themeModal = document.getElementById('theme-modal');
     const themeModalClose = document.getElementById('theme-modal-close');
+    const weatherSettingsBtn = document.getElementById('weather-settings-btn');
+    const anniversarySettingsBtn = document.getElementById('anniversary-settings-btn');
+    const notificationSettingsBtn = document.getElementById('notification-settings-btn');
     const statusBtn = document.getElementById('status-btn');
     const statusModal = document.getElementById('status-modal');
     const statusModalClose = document.getElementById('status-modal-close');
@@ -1919,8 +1929,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== ハンバーガーメニュー関数 ==========
+    function closeHamburgerMenu() {
+        if (hamburgerBtn && menuOverlay) {
+            hamburgerBtn.classList.remove('active');
+            menuOverlay.classList.remove('active');
+        }
+    }
+
     // ========== イベントリスナー設定 ==========
     function setupEventListeners() {
+        // ハンバーガーメニューの制御
+        if (hamburgerBtn && menuOverlay) {
+            hamburgerBtn.addEventListener('click', function() {
+                hamburgerBtn.classList.toggle('active');
+                menuOverlay.classList.toggle('active');
+            });
+        }
+        
+        // メニュー閉じるボタン
+        if (menuClose && menuOverlay) {
+            menuClose.addEventListener('click', function() {
+                hamburgerBtn.classList.remove('active');
+                menuOverlay.classList.remove('active');
+            });
+        }
+        
+        // メニューオーバーレイクリックで閉じる
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function(e) {
+                if (e.target === menuOverlay) {
+                    hamburgerBtn.classList.remove('active');
+                    menuOverlay.classList.remove('active');
+                }
+            });
+        }
+        
         // 日時クリアボタン
         if (clearDatetimeBtn) {
             clearDatetimeBtn.addEventListener('click', function() {
@@ -2013,7 +2057,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // バッジモーダル関連
         if (badgeSettingsBtn) {
-            badgeSettingsBtn.addEventListener('click', openBadgeModal);
+            badgeSettingsBtn.addEventListener('click', function() {
+                closeHamburgerMenu();
+                openBadgeModal();
+            });
         }
         if (badgeModalClose) {
             badgeModalClose.addEventListener('click', closeBadgeModal);
@@ -2026,7 +2073,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // テーマモーダル関連
         if (themeSettingsBtn) {
-            themeSettingsBtn.addEventListener('click', openThemeModal);
+            themeSettingsBtn.addEventListener('click', function() {
+                closeHamburgerMenu();
+                openThemeModal();
+            });
         }
         if (themeModalClose) {
             themeModalClose.addEventListener('click', closeThemeModal);
@@ -2061,25 +2111,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // 天気設定ボタン
-        const weatherSettingsBtn = document.getElementById('weather-settings-btn');
         if (weatherSettingsBtn && weatherSystem) {
             weatherSettingsBtn.addEventListener('click', () => {
+                closeHamburgerMenu();
                 weatherSystem.showWeatherSettings();
             });
         }
         
         // 記念日設定ボタン
-        const anniversarySettingsBtn = document.getElementById('anniversary-settings-btn');
         if (anniversarySettingsBtn && anniversarySystem) {
             anniversarySettingsBtn.addEventListener('click', () => {
+                closeHamburgerMenu();
                 anniversarySystem.showAnniversaryModal();
             });
         }
         
         // 通知設定ボタン
-        const notificationSettingsBtn = document.getElementById('notification-settings-btn');
         if (notificationSettingsBtn && notificationSystem) {
             notificationSettingsBtn.addEventListener('click', () => {
+                closeHamburgerMenu();
                 notificationSystem.showNotificationSettings();
             });
         }
