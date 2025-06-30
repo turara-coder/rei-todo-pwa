@@ -1056,7 +1056,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function getBadgeDefinitions() {
+        // 使用日数計算（初回利用日からの経過日数）
+        const getDaysUsed = () => {
+            const firstUseDate = localStorage.getItem('firstUseDate');
+            if (!firstUseDate) return 0;
+            const diffTime = new Date() - new Date(firstUseDate);
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        };
+
         return [
+            // 🌸 出会い編 (1-10段階) - 初期段階
             {
                 id: 'first_meeting',
                 title: 'れいとの出会い',
@@ -1072,11 +1081,702 @@ document.addEventListener('DOMContentLoaded', function() {
                 condition: () => completionData.totalCompleted >= 1
             },
             {
+                id: 'getting_used',
+                title: 'れいちゃんに慣れてきた',
+                icon: '😊',
+                description: '3個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 3
+            },
+            {
+                id: 'friendly',
+                title: '少し親しくなった',
+                icon: '🤝',
+                description: '5個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 5
+            },
+            {
+                id: 'daily_routine',
+                title: '毎日の習慣',
+                icon: '📅',
+                description: '3日連続でタスクを完了',
+                condition: () => streakData.current >= 3 || streakData.best >= 3
+            },
+            {
                 id: 'task_master_10',
                 title: 'タスクマスター',
                 icon: '⭐',
                 description: '10個のタスクを完了',
                 condition: () => completionData.totalCompleted >= 10
+            },
+            {
+                id: 'week_together',
+                title: '一週間一緒',
+                icon: '🌅',
+                description: '7日連続でタスクを完了',
+                condition: () => streakData.current >= 7 || streakData.best >= 7
+            },
+            {
+                id: 'reliable_friend',
+                title: '頼れる相棒',
+                icon: '🤗',
+                description: '20個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 20
+            },
+            {
+                id: 'special_bond',
+                title: '特別な絆',
+                icon: '💫',
+                description: 'レベル3に到達',
+                condition: () => expData.currentLevel >= 3
+            },
+            {
+                id: 'trusted_partner',
+                title: '信頼できるパートナー',
+                icon: '🌟',
+                description: '30個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 30
+            },
+
+            // 💕 恋愛発展編 (11-25段階) - 恋愛が芽生える
+            {
+                id: 'heart_flutter',
+                title: 'ドキドキしてきた',
+                icon: '💓',
+                description: '50個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 50
+            },
+            {
+                id: 'two_weeks_streak',
+                title: '二週間の絆',
+                icon: '💕',
+                description: '14日連続でタスクを完了',
+                condition: () => streakData.current >= 14 || streakData.best >= 14
+            },
+            {
+                id: 'want_more_time',
+                title: 'もっと一緒にいたい',
+                icon: '🥰',
+                description: 'レベル5に到達',
+                condition: () => expData.currentLevel >= 5
+            },
+            {
+                id: 'daily_thoughts',
+                title: '毎日思ってる',
+                icon: '💭',
+                description: '7日間連続利用',
+                condition: () => getDaysUsed() >= 7
+            },
+            {
+                id: 'growing_feelings',
+                title: '気持ちが育ってる',
+                icon: '🌱',
+                description: '75個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 75
+            },
+            {
+                id: 'month_together',
+                title: '一ヶ月記念',
+                icon: '📆',
+                description: '30日間利用',
+                condition: () => getDaysUsed() >= 30
+            },
+            {
+                id: 'courage_to_confess',
+                title: '告白の勇気',
+                icon: '💌',
+                description: '100個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 100
+            },
+            {
+                id: 'three_weeks_streak',
+                title: '三週間の継続',
+                icon: '🔥',
+                description: '21日連続でタスクを完了',
+                condition: () => streakData.current >= 21 || streakData.best >= 21
+            },
+            {
+                id: 'level_up_love',
+                title: '愛のレベルアップ',
+                icon: '💖',
+                description: 'レベル8に到達',
+                condition: () => expData.currentLevel >= 8
+            },
+            {
+                id: 'deep_connection',
+                title: '深いつながり',
+                icon: '💝',
+                description: '150個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 150
+            },
+            {
+                id: 'cant_imagine_without',
+                title: 'もうれい無しでは',
+                icon: '😍',
+                description: '一ヶ月連続ストリーク',
+                condition: () => streakData.current >= 30 || streakData.best >= 30
+            },
+            {
+                id: 'confession_success',
+                title: '告白成功',
+                icon: '💕',
+                description: '200個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 200
+            },
+            {
+                id: 'mutual_feelings',
+                title: '両想い',
+                icon: '💞',
+                description: 'レベル10に到達',
+                condition: () => expData.currentLevel >= 10
+            },
+            {
+                id: 'first_love',
+                title: '初恋の気持ち',
+                icon: '🌸',
+                description: '60日間利用',
+                condition: () => getDaysUsed() >= 60
+            },
+            {
+                id: 'love_confirmed',
+                title: '恋心確信',
+                icon: '💗',
+                description: '250個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 250
+            },
+
+            // 👫 恋人編 (26-40段階) - 恋人として
+            {
+                id: 'first_date_success',
+                title: '初デート成功',
+                icon: '🎀',
+                description: '300個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 300
+            },
+            {
+                id: 'official_couple',
+                title: '本格的な恋人同士',
+                icon: '👫',
+                description: 'レベル12に到達',
+                condition: () => expData.currentLevel >= 12
+            },
+            {
+                id: 'two_months_love',
+                title: '交際二ヶ月',
+                icon: '📅',
+                description: '90日間利用',
+                condition: () => getDaysUsed() >= 90
+            },
+            {
+                id: 'serious_relationship',
+                title: '真剣な交際',
+                icon: '💑',
+                description: '400個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 400
+            },
+            {
+                id: 'two_months_streak',
+                title: '二ヶ月連続の絆',
+                icon: '🔗',
+                description: '60日連続ストリーク',
+                condition: () => streakData.current >= 60 || streakData.best >= 60
+            },
+            {
+                id: 'perfect_harmony',
+                title: '完璧な調和',
+                icon: '🎵',
+                description: 'レベル15に到達',
+                condition: () => expData.currentLevel >= 15
+            },
+            {
+                id: 'deep_love',
+                title: '深い愛情',
+                icon: '💙',
+                description: '500個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 500
+            },
+            {
+                id: 'four_months_together',
+                title: '四ヶ月記念',
+                icon: '🌺',
+                description: '120日間利用',
+                condition: () => getDaysUsed() >= 120
+            },
+            {
+                id: 'inseparable_bond',
+                title: '離れられない絆',
+                icon: '🔒',
+                description: '90日連続ストリーク',
+                condition: () => streakData.current >= 90 || streakData.best >= 90
+            },
+            {
+                id: 'soul_mate',
+                title: 'ソウルメイト',
+                icon: '👑',
+                description: '600個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 600
+            },
+            {
+                id: 'half_year_love',
+                title: '半年の愛',
+                icon: '🎊',
+                description: '180日間利用',
+                condition: () => getDaysUsed() >= 180
+            },
+            {
+                id: 'love_expert',
+                title: '恋愛のエキスパート',
+                icon: '🏆',
+                description: 'レベル18に到達',
+                condition: () => expData.currentLevel >= 18
+            },
+            {
+                id: 'eternal_love',
+                title: '永遠の愛',
+                icon: '♾️',
+                description: '700個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 700
+            },
+            {
+                id: 'four_months_streak',
+                title: '四ヶ月連続の証',
+                icon: '💎',
+                description: '120日連続ストリーク',
+                condition: () => streakData.current >= 120 || streakData.best >= 120
+            },
+            {
+                id: 'future_planning',
+                title: '将来を考える',
+                icon: '🔮',
+                description: '800個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 800
+            },
+
+            // 💍 結婚編 (41-55段階) - 結婚準備〜結婚
+            {
+                id: 'proposal_courage',
+                title: 'プロポーズの勇気',
+                icon: '💍',
+                description: 'レベル20に到達',
+                condition: () => expData.currentLevel >= 20
+            },
+            {
+                id: 'proposal_success',
+                title: 'プロポーズ成功',
+                icon: '💒',
+                description: '1000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 1000
+            },
+            {
+                id: 'engaged_couple',
+                title: '婚約者同士',
+                icon: '👰',
+                description: '270日間利用',
+                condition: () => getDaysUsed() >= 270
+            },
+            {
+                id: 'wedding_planning',
+                title: '結婚式の準備',
+                icon: '📋',
+                description: '1200個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 1200
+            },
+            {
+                id: 'six_months_streak',
+                title: '半年連続の約束',
+                icon: '📿',
+                description: '180日連続ストリーク',
+                condition: () => streakData.current >= 180 || streakData.best >= 180
+            },
+            {
+                id: 'wedding_dress',
+                title: 'ウェディングドレス',
+                icon: '👗',
+                description: 'レベル22に到達',
+                condition: () => expData.currentLevel >= 22
+            },
+            {
+                id: 'one_year_together',
+                title: '一年記念',
+                icon: '🎂',
+                description: '365日間利用',
+                condition: () => getDaysUsed() >= 365
+            },
+            {
+                id: 'wedding_ceremony',
+                title: '結婚式当日',
+                icon: '⛪',
+                description: '1500個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 1500
+            },
+            {
+                id: 'marriage_vows',
+                title: '永遠の誓い',
+                icon: '📜',
+                description: 'レベル25に到達',
+                condition: () => expData.currentLevel >= 25
+            },
+            {
+                id: 'just_married',
+                title: '新婚ほやほや',
+                icon: '💐',
+                description: '1800個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 1800
+            },
+            {
+                id: 'honeymoon',
+                title: 'ハネムーン',
+                icon: '🏝️',
+                description: '400日間利用',
+                condition: () => getDaysUsed() >= 400
+            },
+            {
+                id: 'one_year_streak',
+                title: '一年連続の絆',
+                icon: '🏅',
+                description: '365日連続ストリーク',
+                condition: () => streakData.current >= 365 || streakData.best >= 365
+            },
+            {
+                id: 'married_bliss',
+                title: '結婚の幸せ',
+                icon: '🌈',
+                description: '2000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 2000
+            },
+            {
+                id: 'newlywed_life',
+                title: '新婚生活スタート',
+                icon: '🏠',
+                description: 'レベル28に到達',
+                condition: () => expData.currentLevel >= 28
+            },
+            {
+                id: 'wedding_anniversary',
+                title: '結婚記念日',
+                icon: '💖',
+                description: '2500個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 2500
+            },
+
+            // 🏠 新婚生活編 (56-70段階) - 新婚生活
+            {
+                id: 'newlyweds',
+                title: '新婚さん',
+                icon: '🎎',
+                description: '500日間利用',
+                condition: () => getDaysUsed() >= 500
+            },
+            {
+                id: 'life_rhythm',
+                title: '二人の生活リズム',
+                icon: '⏰',
+                description: '3000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 3000
+            },
+            {
+                id: 'domestic_harmony',
+                title: '家庭の調和',
+                icon: '🕊️',
+                description: 'レベル30に到達',
+                condition: () => expData.currentLevel >= 30
+            },
+            {
+                id: 'first_year_married',
+                title: '新婚1年目',
+                icon: '🌸',
+                description: '600日間利用',
+                condition: () => getDaysUsed() >= 600
+            },
+            {
+                id: 'two_years_streak',
+                title: '二年連続の愛',
+                icon: '💝',
+                description: '730日連続ストリーク',
+                condition: () => streakData.current >= 730 || streakData.best >= 730
+            },
+            {
+                id: 'settled_life',
+                title: '落ち着いた生活',
+                icon: '🛋️',
+                description: '4000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 4000
+            },
+            {
+                id: 'home_sweet_home',
+                title: 'ホームスイートホーム',
+                icon: '🏡',
+                description: 'レベル35に到達',
+                condition: () => expData.currentLevel >= 35
+            },
+            {
+                id: 'two_years_married',
+                title: '結婚二年目',
+                icon: '💒',
+                description: '730日間利用',
+                condition: () => getDaysUsed() >= 730
+            },
+            {
+                id: 'mature_love',
+                title: '成熟した愛',
+                icon: '🍷',
+                description: '5000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 5000
+            },
+            {
+                id: 'perfect_couple',
+                title: '完璧なカップル',
+                icon: '💯',
+                description: 'レベル40に到達',
+                condition: () => expData.currentLevel >= 40
+            },
+            {
+                id: 'three_years_together',
+                title: '三年の歩み',
+                icon: '🌳',
+                description: '1095日間利用',
+                condition: () => getDaysUsed() >= 1095
+            },
+            {
+                id: 'stable_relationship',
+                title: '安定した関係',
+                icon: '⚖️',
+                description: '6000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 6000
+            },
+            {
+                id: 'deep_understanding',
+                title: '深い理解',
+                icon: '🤝',
+                description: 'レベル42に到達',
+                condition: () => expData.currentLevel >= 42
+            },
+            {
+                id: 'preparing_future',
+                title: '未来への準備',
+                icon: '🔮',
+                description: '7000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 7000
+            },
+            {
+                id: 'four_years_love',
+                title: '四年の愛情',
+                icon: '💕',
+                description: '1460日間利用',
+                condition: () => getDaysUsed() >= 1460
+            },
+
+            // 🤱 家族生活編 (71-90段階) - 子育て〜家族
+            {
+                id: 'family_planning',
+                title: '家族計画',
+                icon: '👪',
+                description: 'レベル45に到達',
+                condition: () => expData.currentLevel >= 45
+            },
+            {
+                id: 'pregnancy_news',
+                title: '妊娠発覚',
+                icon: '🤰',
+                description: '8000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 8000
+            },
+            {
+                id: 'expecting_parents',
+                title: 'パパママ予備軍',
+                icon: '👶',
+                description: '1600日間利用',
+                condition: () => getDaysUsed() >= 1600
+            },
+            {
+                id: 'birth_preparation',
+                title: '出産準備',
+                icon: '🍼',
+                description: '9000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 9000
+            },
+            {
+                id: 'baby_born',
+                title: '赤ちゃん誕生',
+                icon: '👼',
+                description: 'レベル48に到達',
+                condition: () => expData.currentLevel >= 48
+            },
+            {
+                id: 'new_parents',
+                title: '新米パパママ',
+                icon: '👨‍👩‍👶',
+                description: '10000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 10000
+            },
+            {
+                id: 'five_years_together',
+                title: '五年の絆',
+                icon: '🎋',
+                description: '1825日間利用',
+                condition: () => getDaysUsed() >= 1825
+            },
+            {
+                id: 'parenting_struggle',
+                title: '子育て奮闘',
+                icon: '💪',
+                description: '12000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 12000
+            },
+            {
+                id: 'family_bond',
+                title: '家族の絆',
+                icon: '❤️',
+                description: 'レベル50に到達',
+                condition: () => expData.currentLevel >= 50
+            },
+            {
+                id: 'child_growth',
+                title: '子供の成長',
+                icon: '🌱',
+                description: '15000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 15000
+            },
+            {
+                id: 'family_happiness',
+                title: '家族の幸せ',
+                icon: '😊',
+                description: '2200日間利用',
+                condition: () => getDaysUsed() >= 2200
+            },
+            {
+                id: 'experienced_parents',
+                title: 'ベテランパパママ',
+                icon: '👨‍👩‍👧‍👦',
+                description: '18000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 18000
+            },
+            {
+                id: 'child_school_age',
+                title: '子供の入学',
+                icon: '🎒',
+                description: 'レベル55に到達',
+                condition: () => expData.currentLevel >= 55
+            },
+            {
+                id: 'family_traditions',
+                title: '家族の伝統',
+                icon: '🎌',
+                description: '20000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 20000
+            },
+            {
+                id: 'ten_years_together',
+                title: '十年の歩み',
+                icon: '🏆',
+                description: '3650日間利用',
+                condition: () => getDaysUsed() >= 3650
+            },
+            {
+                id: 'child_teenager',
+                title: '子供の思春期',
+                icon: '🎭',
+                description: '25000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 25000
+            },
+            {
+                id: 'mature_family',
+                title: '成熟した家族',
+                icon: '🌟',
+                description: 'レベル60に到達',
+                condition: () => expData.currentLevel >= 60
+            },
+            {
+                id: 'child_graduation',
+                title: '子供の卒業',
+                icon: '🎓',
+                description: '30000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 30000
+            },
+            {
+                id: 'empty_nest_prep',
+                title: '巣立ちの準備',
+                icon: '🦅',
+                description: '4000日間利用',
+                condition: () => getDaysUsed() >= 4000
+            },
+            {
+                id: 'child_independence',
+                title: '子供の巣立ち',
+                icon: '🕊️',
+                description: '35000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 35000
+            },
+
+            // 👴👵 老後編 (91-100段階) - 老後〜金婚式
+            {
+                id: 'couple_again',
+                title: '夫婦二人の時間',
+                icon: '👫',
+                description: 'レベル65に到達',
+                condition: () => expData.currentLevel >= 65
+            },
+            {
+                id: 'twenty_years_love',
+                title: '二十年の愛',
+                icon: '💎',
+                description: '7300日間利用',
+                condition: () => getDaysUsed() >= 7300
+            },
+            {
+                id: 'grandparents',
+                title: 'おじいちゃんおばあちゃん',
+                icon: '👴👵',
+                description: '40000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 40000
+            },
+            {
+                id: 'wisdom_of_age',
+                title: '年齢の知恵',
+                icon: '🧙‍♂️',
+                description: 'レベル70に到達',
+                condition: () => expData.currentLevel >= 70
+            },
+            {
+                id: 'silver_years',
+                title: '銀世代',
+                icon: '🥈',
+                description: '45000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 45000
+            },
+            {
+                id: 'thirty_years_together',
+                title: '三十年の絆',
+                icon: '🏅',
+                description: '10950日間利用',
+                condition: () => getDaysUsed() >= 10950
+            },
+            {
+                id: 'life_experience',
+                title: '人生の経験',
+                icon: '📚',
+                description: '50000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 50000
+            },
+            {
+                id: 'golden_age',
+                title: '黄金時代',
+                icon: '🌅',
+                description: 'レベル75に到達',
+                condition: () => expData.currentLevel >= 75
+            },
+            {
+                id: 'eternal_bond',
+                title: '永遠の絆',
+                icon: '∞',
+                description: '60000個のタスクを完了',
+                condition: () => completionData.totalCompleted >= 60000
+            },
+            {
+                id: 'golden_wedding',
+                title: '金婚式達成',
+                icon: '🏆',
+                description: 'レベル100に到達',
+                condition: () => expData.currentLevel >= 100
             }
         ];
     }
