@@ -433,24 +433,26 @@ body {
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%) translateY(-100px);
+  transform: translateX(-50%);
   z-index: 9999;
   max-width: 400px;
   width: 90%;
-  transition: all 0.3s ease;
   pointer-events: none;
+  /* 初期状態：非表示 */
   opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .rei-toast.show {
   pointer-events: auto;
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  visibility: visible;
 }
 
 .rei-toast.hidden {
   opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
+  visibility: hidden;
   pointer-events: none;
 }
 
@@ -628,10 +630,14 @@ body {
 .settings-buttons {
   display: flex;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 .badge-settings-btn,
-.theme-settings-btn {
+.theme-settings-btn,
+.weather-settings-btn,
+.anniversary-settings-btn,
+.notification-settings-btn {
   background: linear-gradient(45deg, #a55eea, #26de81);
   color: white;
   border: none;
@@ -647,8 +653,23 @@ body {
   background: linear-gradient(45deg, #74b9ff, #0984e3);
 }
 
+.weather-settings-btn {
+  background: linear-gradient(45deg, #feca57, #ff6b6b);
+}
+
+.anniversary-settings-btn {
+  background: linear-gradient(45deg, #ff6ec7, #ff61d2);
+}
+
+.notification-settings-btn {
+  background: linear-gradient(45deg, #55a3ff, #3742fa);
+}
+
 .badge-settings-btn:hover,
-.theme-settings-btn:hover {
+.theme-settings-btn:hover,
+.weather-settings-btn:hover,
+.anniversary-settings-btn:hover,
+.notification-settings-btn:hover {
   transform: scale(1.05);
 }
 
@@ -1653,6 +1674,94 @@ body {
 /* 非表示クラス */
 .hidden {
   display: none !important;
+}
+
+/* 祝福アニメーション */
+@keyframes badgeUnlockPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes specialMessagePop {
+  0% {
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(-50%) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes specialMessageFade {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.badge-unlock-animation {
+  text-align: center;
+  pointer-events: none;
+}
+
+.badge-unlock-icon {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+  animation: badgeGlow 2s ease-in-out infinite;
+}
+
+.badge-unlock-text {
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* 花火エフェクト用 */
+.firework {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.firework-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: fireworkParticle 1s ease-out forwards;
+}
+
+@keyframes fireworkParticle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* スマートフォン対応 */

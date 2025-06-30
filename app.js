@@ -1,6 +1,10 @@
 // れいのToDo PWA版 JavaScript - 修正版
 let deferredPrompt;
 let isOnline = navigator.onLine;
+let celebrationSystem = null;
+let weatherSystem = null;
+let anniversarySystem = null;
+let notificationSystem = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM要素の取得
@@ -246,15 +250,18 @@ document.addEventListener('DOMContentLoaded', function() {
         displayTodos();
         updateProgress();
         
-        const encouragementMessages = [
-            `「${sanitizedText}」追加したよ〜♡ 一緒に頑張ろうね！`,
-            `新しいタスクだね〜✨ れいも応援してるよ♪`,
-            `「${sanitizedText}」、きっとできるよ〜！ファイト〜♡`,
-            `タスク追加完了〜♪ れいと一緒だから大丈夫だよ〜✨`
-        ];
-        
-        const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-        showReiMessage(randomMessage, 5000); // タスク追加メッセージ
+        // メッセージ表示を少し遅延させて他の処理と競合しないようにする
+        setTimeout(() => {
+            const encouragementMessages = [
+                `「${sanitizedText}」追加したよ〜♡ 一緒に頑張ろうね！`,
+                `新しいタスクだね〜✨ れいも応援してるよ♪`,
+                `「${sanitizedText}」、きっとできるよ〜！ファイト〜♡`,
+                `タスク追加完了〜♪ れいと一緒だから大丈夫だよ〜✨`
+            ];
+            
+            const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+            showReiMessage(randomMessage, 5000); // タスク追加メッセージ
+        }, 100); // 他の処理完了後にメッセージ表示
     }
 
     function displayTodos() {
@@ -309,10 +316,12 @@ document.addEventListener('DOMContentLoaded', function() {
         todo.completed = !todo.completed;
         
         if (!wasCompleted && todo.completed) {
+            // タスク完了時 - 完了日時を記録
+            todo.completedAt = new Date();
             addExp(10);
             updateStreakOnCompletion();
             updateDailyTaskRecord();
-            updateCompletionCounter(); // 完了カウンター更新
+            updateCompletionCounter(true); // 完了カウンター増加
             
             setTimeout(() => {
                 checkAndUnlockBadges();
@@ -330,6 +339,19 @@ document.addEventListener('DOMContentLoaded', function() {
             ];
             const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
             showReiMessage(randomMessage, 5000); // 完了メッセージ
+            
+            // 祝福アニメーション発動
+            if (celebrationSystem) {
+                const checkbox = document.querySelector(`input[onchange="toggleComplete(${id})"]`);
+                if (checkbox) {
+                    celebrationSystem.celebrateTaskCompletion(checkbox.parentElement);
+                }
+            }
+        } else if (wasCompleted && !todo.completed) {
+            // タスク未完了に戻した時 - 完了日時をクリア
+            delete todo.completedAt;
+            updateCompletionCounter(false); // 完了カウンター減少
+            showReiMessage('タスクを未完了に戻したよ〜');
         }
         
         saveTodos();
@@ -544,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========== 完了カウンター関数 ==========
-    function updateCompletionCounter() {
+    function updateCompletionCounter(isCompleting = true) {
         const today = new Date().toDateString();
         
         // 日付が変わったらリセット
@@ -553,24 +575,39 @@ document.addEventListener('DOMContentLoaded', function() {
             completionData.lastResetDate = today;
         }
         
-        // 今日の完了数を増加
-        completionData.todayCompleted++;
-        completionData.totalCompleted++;
-        
-        // 日別記録を保存
-        if (!completionData.dailyCompletions[today]) {
-            completionData.dailyCompletions[today] = 0;
+        if (isCompleting) {
+            // 今日の完了数を増加
+            completionData.todayCompleted++;
+            completionData.totalCompleted++;
+            
+            // 日別記録を保存
+            if (!completionData.dailyCompletions[today]) {
+                completionData.dailyCompletions[today] = 0;
+            }
+            completionData.dailyCompletions[today]++;
+            
+            // 達成メッセージ
+            showCompletionMessage();
+        } else {
+            // 完了を取り消す場合
+            if (completionData.todayCompleted > 0) {
+                completionData.todayCompleted--;
+            }
+            if (completionData.totalCompleted > 0) {
+                completionData.totalCompleted--;
+            }
+            
+            // 日別記録を調整
+            if (completionData.dailyCompletions[today] && completionData.dailyCompletions[today] > 0) {
+                completionData.dailyCompletions[today]--;
+            }
         }
-        completionData.dailyCompletions[today]++;
         
         // 表示を更新
         updateCompletionDisplay();
         
         // データを保存
         saveCompletionData();
-        
-        // 達成メッセージ
-        showCompletionMessage();
     }
     
     function updateCompletionDisplay() {
@@ -622,7 +659,40 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 日付が変わっていたらリセット
         resetDailyCompletion();
+        
+        // データの整合性をチェック・修正
+        syncCompletionDataWithTodos();
+        
         updateCompletionDisplay();
+    }
+    
+    function syncCompletionDataWithTodos() {
+        // 実際のtodosデータから今日の完了数を再計算
+        const today = new Date().toDateString();
+        const todaysCompletedTodos = todos.filter(todo => {
+            if (!todo.completed) return false;
+            
+            // completedAtがない場合は今日とみなす（後方互換性）
+            if (!todo.completedAt) return true;
+            
+            const completedDate = new Date(todo.completedAt).toDateString();
+            return completedDate === today;
+        });
+        
+        // 今日の完了数を実際のデータと同期
+        const actualTodayCompleted = todaysCompletedTodos.length;
+        if (completionData.todayCompleted !== actualTodayCompleted) {
+            console.log(`今日の完了数を同期: ${completionData.todayCompleted} → ${actualTodayCompleted}`);
+            completionData.todayCompleted = actualTodayCompleted;
+            
+            // 日別記録も更新
+            if (!completionData.dailyCompletions[today]) {
+                completionData.dailyCompletions[today] = 0;
+            }
+            completionData.dailyCompletions[today] = actualTodayCompleted;
+            
+            saveCompletionData();
+        }
     }
 
     // ========== ステータスモーダル関数 ==========
@@ -942,6 +1012,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     levelElement.style.animation = '';
                 }, 1000);
             }
+            
+            // レベルアップ祝福アニメーション
+            if (celebrationSystem) {
+                celebrationSystem.celebrateLevelUp();
+            }
+            
+            // テーマ解放チェック
+            checkThemeUnlocks();
         }
         
         localStorage.setItem('expData', JSON.stringify(expData));
@@ -1027,6 +1105,11 @@ document.addEventListener('DOMContentLoaded', function() {
             saveBadgeData(badgeData);
             newBadges.forEach(badge => {
                 showReiMessage(`🏆 新しい称号「${badge.title}」を獲得したよ〜♡`);
+                
+                // 称号獲得祝福アニメーション
+                if (celebrationSystem) {
+                    celebrationSystem.celebrateBadgeUnlock(badge.icon);
+                }
             });
         }
     }
@@ -1047,6 +1130,31 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('themeData', JSON.stringify(themeData));
     }
     
+    function checkThemeUnlocks() {
+        let newlyUnlocked = false;
+        
+        Object.values(themeDefinitions).forEach(theme => {
+            if (!themeData.unlockedThemes.includes(theme.id) && expData.currentLevel >= theme.unlockLevel) {
+                themeData.unlockedThemes.push(theme.id);
+                newlyUnlocked = true;
+                
+                // テーマ解放メッセージ
+                setTimeout(() => {
+                    showReiMessage(theme.unlockMessage);
+                    
+                    // 特別な祝福アニメーション
+                    if (celebrationSystem) {
+                        celebrationSystem.celebrateSpecialDay(`新テーマ「${theme.name}」解放！`);
+                    }
+                }, 2000);
+            }
+        });
+        
+        if (newlyUnlocked) {
+            saveThemeData();
+        }
+    }
+    
     function updateDailyTaskRecord() {
         const today = new Date().toDateString();
         if (!badgeData.stats.dailyTasksCompleted[today]) {
@@ -1064,6 +1172,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalElement) totalElement.textContent = completionData.totalCompleted;
         if (streakElement) streakElement.textContent = streakData.best + '日';
         if (levelElement) levelElement.textContent = expData.currentLevel;
+    }
+
+    // ========== 祝福アニメーションシステム ==========
+    function initializeCelebrationSystem() {
+        // celebration.jsが読み込まれているか確認
+        if (typeof CelebrationSystem !== 'undefined') {
+            celebrationSystem = new CelebrationSystem();
+            celebrationSystem.init();
+        }
+    }
+    
+    // ========== 天気システム ==========
+    function initializeWeatherSystem() {
+        // weather-system.jsが読み込まれているか確認
+        if (typeof WeatherSystem !== 'undefined') {
+            weatherSystem = new WeatherSystem();
+            weatherSystem.init();
+            
+            // グローバルに公開（設定用）
+            window.weatherSystem = weatherSystem;
+        }
+    }
+    
+    // ========== 記念日システム ==========
+    function initializeAnniversarySystem() {
+        // anniversary-system.jsが読み込まれているか確認
+        if (typeof AnniversarySystem !== 'undefined') {
+            anniversarySystem = new AnniversarySystem();
+            anniversarySystem.init();
+            
+            // グローバルに公開（設定用）
+            window.anniversarySystem = anniversarySystem;
+        }
+    }
+    
+    // ========== 通知システム ==========
+    function initializeNotificationSystem() {
+        // notification-system.jsが読み込まれているか確認
+        if (typeof NotificationSystem !== 'undefined') {
+            notificationSystem = new NotificationSystem();
+            notificationSystem.init();
+            
+            // グローバルに公開（設定用）
+            window.notificationSystem = notificationSystem;
+        }
     }
 
     // ========== イベントリスナー設定 ==========
@@ -1206,6 +1359,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.target === reiToast) hideReiToast();
             });
         }
+        
+        // 天気設定ボタン
+        const weatherSettingsBtn = document.getElementById('weather-settings-btn');
+        if (weatherSettingsBtn && weatherSystem) {
+            weatherSettingsBtn.addEventListener('click', () => {
+                weatherSystem.showWeatherSettings();
+            });
+        }
+        
+        // 記念日設定ボタン
+        const anniversarySettingsBtn = document.getElementById('anniversary-settings-btn');
+        if (anniversarySettingsBtn && anniversarySystem) {
+            anniversarySettingsBtn.addEventListener('click', () => {
+                anniversarySystem.showAnniversaryModal();
+            });
+        }
+        
+        // 通知設定ボタン
+        const notificationSettingsBtn = document.getElementById('notification-settings-btn');
+        if (notificationSettingsBtn && notificationSystem) {
+            notificationSettingsBtn.addEventListener('click', () => {
+                notificationSystem.showNotificationSettings();
+            });
+        }
     }
 
     // ========== グローバル関数（HTML内から呼び出し用） ==========
@@ -1222,6 +1399,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeBadgeSystem();
     initializeThemeSystem();
     loadCompletionData(); // 完了カウンターデータ読み込み
+    initializeCelebrationSystem(); // 祝福アニメーションシステム初期化
+    initializeWeatherSystem(); // 天気システム初期化
+    initializeAnniversarySystem(); // 記念日システム初期化
+    initializeNotificationSystem(); // 通知システム初期化
     
     // スマホ対応: 初期フォーカス設定
     setTimeout(() => {

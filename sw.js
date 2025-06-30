@@ -1,10 +1,14 @@
 // れいのToDo PWA - Service Worker
-const CACHE_NAME = 'rei-todo-v18';
+const CACHE_NAME = 'rei-todo-v23';
 const urlsToCache = [
     '/',
     '/index.html',
     '/style.css',
     '/app.js',
+    '/celebration.js',
+    '/weather-system.js',
+    '/anniversary-system.js',
+    '/notification-system.js',
     '/manifest.json',
     '/icons/icon-192.png',
     '/icons/icon-512.png'
