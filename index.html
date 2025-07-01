@@ -169,10 +169,18 @@
       </button>
     </form>
     
-    <!-- タスクリスト -->
-    <div class="todo-container">
+    <!-- タスク表示コントロール -->
+    <div class="task-controls">
+      <div class="view-toggle">
+        <button class="view-btn active" id="today-view-btn">📅 今日のタスク</button>
+        <button class="view-btn" id="calendar-view-btn">📆 カレンダー</button>
+      </div>
+    </div>
+
+    <!-- 今日のタスクリスト -->
+    <div class="todo-container" id="today-container">
       <div class="list-header">
-        <h2>📝 タスクリスト</h2>
+        <h2>📝 今日のタスク</h2>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
           <span class="progress-text" id="progress-text">0%</span>
@@ -183,8 +191,38 @@
       <!-- 空の状態 -->
       <div id="empty-state" class="empty-state">
         <div class="empty-icon">🌸</div>
-        <p>まだタスクがないよ〜</p>
+        <p>今日はまだタスクがないよ〜</p>
         <p>れいと一緒に何から始める？</p>
+      </div>
+    </div>
+
+    <!-- 完了タスクリスト -->
+    <div class="completed-container" id="completed-container">
+      <div class="completed-header" id="completed-header">
+        <h3>✅ 完了したタスク (<span id="completed-count">0</span>)</h3>
+        <button class="toggle-btn" id="completed-toggle">▼</button>
+      </div>
+      <div class="completed-content" id="completed-content">
+        <ul id="completed-list" class="completed-list"></ul>
+        <div id="completed-empty" class="completed-empty">
+          <p>まだ完了したタスクがないよ〜</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- カレンダービュー -->
+    <div class="calendar-container hidden" id="calendar-container">
+      <div class="calendar-header">
+        <button class="calendar-nav" id="prev-month">‹</button>
+        <h2 id="calendar-title">2025年7月</h2>
+        <button class="calendar-nav" id="next-month">›</button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid">
+        <!-- カレンダーがここに動的に生成されます -->
+      </div>
+      <div class="calendar-tasks" id="calendar-tasks">
+        <h3 id="selected-date-title">日付を選択してください</h3>
+        <ul id="date-task-list" class="date-task-list"></ul>
       </div>
     </div>
   </div>

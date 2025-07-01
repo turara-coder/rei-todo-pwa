@@ -55,6 +55,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const installButton = document.getElementById('install-button');
     const dismissBanner = document.getElementById('dismiss-banner');
     const offlineNotice = document.getElementById('offline-notice');
+    
+    // 新しいUI要素
+    const todayViewBtn = document.getElementById('today-view-btn');
+    const calendarViewBtn = document.getElementById('calendar-view-btn');
+    const todayContainer = document.getElementById('today-container');
+    const calendarContainer = document.getElementById('calendar-container');
+    const completedHeader = document.getElementById('completed-header');
+    const completedToggle = document.getElementById('completed-toggle');
+    const completedContent = document.getElementById('completed-content');
+    const completedContainer = document.getElementById('completed-container');
 
     // ========== グローバル変数 ==========
     let todos = [];
@@ -275,28 +285,87 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayTodos() {
+        displayTodayTasks();
+        displayCompletedTasks();
+    }
+
+    function displayTodayTasks() {
         if (!todoList) return;
         
         todoList.innerHTML = '';
         
-        const incompleteTodos = todos.filter(todo => !todo.completed);
-        const completedTodos = todos.filter(todo => todo.completed);
+        const today = new Date().toISOString().split('T')[0];
+        const todayTasks = todos.filter(todo => 
+            !todo.completed && 
+            (todo.dueDate === today || todo.dueDate === '' || !todo.dueDate)
+        );
         
-        if (todos.length === 0) {
+        if (todayTasks.length === 0) {
             if (emptyState) emptyState.style.display = 'block';
             return;
         }
         
         if (emptyState) emptyState.style.display = 'none';
         
-        const allTodos = [...incompleteTodos, ...completedTodos];
-        
-        allTodos.forEach(todo => {
+        todayTasks.forEach(todo => {
             const li = document.createElement('li');
-            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+            li.className = 'todo-item';
             li.innerHTML = createTodoHTML(todo);
             todoList.appendChild(li);
         });
+
+        updateTodayProgress();
+    }
+
+    function displayCompletedTasks() {
+        const completedList = document.getElementById('completed-list');
+        const completedCount = document.getElementById('completed-count');
+        const completedEmpty = document.getElementById('completed-empty');
+        
+        if (!completedList || !completedCount || !completedEmpty) return;
+        
+        completedList.innerHTML = '';
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todayCompleted = todos.filter(todo => 
+            todo.completed && 
+            todo.completedAt &&
+            new Date(todo.completedAt).toISOString().split('T')[0] === today
+        );
+        
+        completedCount.textContent = todayCompleted.length;
+        
+        if (todayCompleted.length === 0) {
+            completedEmpty.style.display = 'block';
+            return;
+        }
+        
+        completedEmpty.style.display = 'none';
+        
+        todayCompleted.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = 'todo-item completed';
+            li.innerHTML = createCompletedTodoHTML(todo);
+            completedList.appendChild(li);
+        });
+    }
+
+    function updateTodayProgress() {
+        const today = new Date().toISOString().split('T')[0];
+        const todayTasks = todos.filter(todo => 
+            (todo.dueDate === today || todo.dueDate === '' || !todo.dueDate)
+        );
+        const completedToday = todayTasks.filter(todo => todo.completed).length;
+        const totalToday = todayTasks.length;
+        
+        const progressPercentage = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+        
+        if (progressFill) {
+            progressFill.style.width = `${progressPercentage}%`;
+        }
+        if (progressText) {
+            progressText.textContent = `${progressPercentage}%`;
+        }
     }
 
     function createTodoHTML(todo) {
@@ -308,13 +377,44 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return `
             <div class="todo-content">
-                <input type="checkbox" ${todo.completed ? 'checked' : ''} 
-                       onchange="toggleComplete(${todo.id})" />
                 <span class="todo-text">${escapeHtml(todo.text)}</span>
                 ${dueDateDisplay}
                 ${repeatDisplay}
             </div>
-            <button class="delete-btn" onclick="deleteTodo(${todo.id})">🗑️</button>
+            <div class="todo-actions">
+                <button class="complete-btn" onclick="toggleComplete(${todo.id})" title="完了にする">
+                    ✅
+                </button>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})" title="削除">
+                    🗑️
+                </button>
+            </div>
+        `;
+    }
+
+    function createCompletedTodoHTML(todo) {
+        const dueDateDisplay = todo.dueDate ? 
+            `<span class="due-date">${formatDueDate(todo.dueDate)}</span>` : '';
+        
+        const completedAtDisplay = todo.completedAt ? 
+            `<span class="completed-time">完了: ${new Date(todo.completedAt).toLocaleString('ja-JP', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            })}</span>` : '';
+        
+        return `
+            <div class="todo-content">
+                <span class="todo-text">${escapeHtml(todo.text)}</span>
+                ${dueDateDisplay}
+                ${completedAtDisplay}
+            </div>
+            <div class="todo-actions">
+                <button class="uncomplete-btn" onclick="toggleComplete(${todo.id})" title="未完了に戻す">
+                    ↩️
+                </button>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})" title="削除">
+                    🗑️
+                </button>
+            </div>
         `;
     }
 
@@ -1937,6 +2037,169 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== ビュー切り替え関数 ==========
+    function showTodayView() {
+        if (todayViewBtn && calendarViewBtn && todayContainer && calendarContainer) {
+            todayViewBtn.classList.add('active');
+            calendarViewBtn.classList.remove('active');
+            todayContainer.classList.remove('hidden');
+            calendarContainer.classList.add('hidden');
+            completedContainer.classList.remove('hidden');
+        }
+    }
+
+    function showCalendarView() {
+        if (todayViewBtn && calendarViewBtn && todayContainer && calendarContainer) {
+            todayViewBtn.classList.remove('active');
+            calendarViewBtn.classList.add('active');
+            todayContainer.classList.add('hidden');
+            calendarContainer.classList.remove('hidden');
+            completedContainer.classList.add('hidden');
+            initializeCalendar();
+        }
+    }
+
+    // ========== 完了タスク折りたたみ関数 ==========
+    function toggleCompletedSection() {
+        if (completedContent && completedToggle) {
+            const isCollapsed = completedContent.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                completedContent.classList.remove('collapsed');
+                completedToggle.classList.remove('collapsed');
+                completedToggle.textContent = '▼';
+            } else {
+                completedContent.classList.add('collapsed');
+                completedToggle.classList.add('collapsed');
+                completedToggle.textContent = '▶';
+            }
+        }
+    }
+
+    // ========== カレンダー関数 ==========
+    let currentCalendarDate = new Date();
+    
+    function initializeCalendar() {
+        renderCalendar();
+        setupCalendarEvents();
+    }
+
+    function renderCalendar() {
+        const calendarGrid = document.getElementById('calendar-grid');
+        const calendarTitle = document.getElementById('calendar-title');
+        
+        if (!calendarGrid || !calendarTitle) return;
+        
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        
+        calendarTitle.textContent = `${year}年${month + 1}月`;
+        
+        // カレンダーをクリア
+        calendarGrid.innerHTML = '';
+        
+        // 月の最初の日と最後の日を取得
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+        
+        // 6週間分の日付を表示
+        for (let i = 0; i < 42; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            dayElement.textContent = currentDate.getDate();
+            
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const tasksForDate = todos.filter(todo => todo.dueDate === dateStr);
+            
+            // 今日の日付をハイライト
+            const today = new Date().toISOString().split('T')[0];
+            if (dateStr === today) {
+                dayElement.classList.add('today');
+            }
+            
+            // 現在の月以外の日付をグレーアウト
+            if (currentDate.getMonth() !== month) {
+                dayElement.style.opacity = '0.3';
+            }
+            
+            // タスクがある日にマーカーを表示
+            if (tasksForDate.length > 0) {
+                dayElement.classList.add('has-tasks');
+            }
+            
+            dayElement.addEventListener('click', () => selectCalendarDate(dateStr));
+            calendarGrid.appendChild(dayElement);
+        }
+    }
+
+    function selectCalendarDate(dateStr) {
+        // 以前選択された日付のスタイルをクリア
+        document.querySelectorAll('.calendar-day.selected').forEach(day => {
+            day.classList.remove('selected');
+        });
+        
+        // 新しく選択された日付にスタイルを適用
+        event.target.classList.add('selected');
+        
+        // 選択された日付のタスクを表示
+        displayTasksForDate(dateStr);
+    }
+
+    function displayTasksForDate(dateStr) {
+        const selectedDateTitle = document.getElementById('selected-date-title');
+        const dateTaskList = document.getElementById('date-task-list');
+        
+        if (!selectedDateTitle || !dateTaskList) return;
+        
+        const date = new Date(dateStr);
+        const dateDisplay = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        selectedDateTitle.textContent = `${dateDisplay}のタスク`;
+        
+        const tasksForDate = todos.filter(todo => todo.dueDate === dateStr);
+        
+        dateTaskList.innerHTML = '';
+        
+        if (tasksForDate.length === 0) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.textContent = 'この日にはタスクがありません';
+            emptyMessage.style.color = '#666';
+            emptyMessage.style.fontStyle = 'italic';
+            dateTaskList.appendChild(emptyMessage);
+            return;
+        }
+        
+        tasksForDate.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+            li.innerHTML = todo.completed ? createCompletedTodoHTML(todo) : createTodoHTML(todo);
+            dateTaskList.appendChild(li);
+        });
+    }
+
+    function setupCalendarEvents() {
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        
+        if (prevMonthBtn) {
+            prevMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar();
+            });
+        }
+        
+        if (nextMonthBtn) {
+            nextMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar();
+            });
+        }
+    }
+
     // ========== イベントリスナー設定 ==========
     function setupEventListeners() {
         // ハンバーガーメニューの制御
@@ -1963,6 +2226,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     menuOverlay.classList.remove('active');
                 }
             });
+        }
+
+        // ビュー切り替え
+        if (todayViewBtn && calendarViewBtn) {
+            todayViewBtn.addEventListener('click', showTodayView);
+            calendarViewBtn.addEventListener('click', showCalendarView);
+        }
+
+        // 完了タスクの折りたたみ
+        if (completedHeader && completedToggle) {
+            completedHeader.addEventListener('click', toggleCompletedSection);
         }
         
         // 日時クリアボタン
@@ -2135,6 +2409,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== UI初期化 ==========
+    function initializeUI() {
+        // 完了タスクリストを初期状態で閉じる
+        if (completedContent && completedToggle) {
+            completedContent.classList.add('collapsed');
+            completedToggle.classList.add('collapsed');
+            completedToggle.textContent = '▶';
+        }
+        
+        // 今日のビューを初期表示
+        showTodayView();
+        
+        // イベントリスナー設定
+        setupEventListeners();
+    }
+
     // ========== グローバル関数（HTML内から呼び出し用） ==========
     window.toggleComplete = toggleComplete;
     window.deleteTodo = deleteTodo;
@@ -2153,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeWeatherSystem(); // 天気システム初期化
     initializeAnniversarySystem(); // 記念日システム初期化
     initializeNotificationSystem(); // 通知システム初期化
+    initializeUI(); // UI初期化
     
     // スマホ対応: 初期フォーカス設定
     setTimeout(() => {
@@ -2164,6 +2455,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 500);
 
-    // イベントリスナーの設定
-    setupEventListeners();
+    // イベントリスナーは initializeUI() 内で設定済み
 });

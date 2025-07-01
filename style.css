@@ -26,6 +26,213 @@ body {
   position: relative;
 }
 
+/* タスク表示コントロール */
+.task-controls {
+  margin-bottom: 1.5rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.view-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+}
+
+.view-btn.active {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.view-btn:hover:not(.active) {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+/* 完了タスクリスト */
+.completed-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.completed-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  transition: background 0.3s ease;
+}
+
+.completed-header:hover {
+  background: linear-gradient(135deg, #88d8c0 0%, #a8e6cf 100%);
+}
+
+.completed-header h3 {
+  margin: 0;
+  color: #2d5a4c;
+  font-size: 1.1rem;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #2d5a4c;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.toggle-btn.collapsed {
+  transform: rotate(-90deg);
+}
+
+.completed-content {
+  max-height: 300px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.completed-content.collapsed {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.completed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.completed-list .todo-item {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  opacity: 0.8;
+  border-left: 4px solid #28a745;
+}
+
+.completed-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* カレンダービュー */
+.calendar-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-nav {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendar-nav:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.calendar-day:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.calendar-day.today {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+}
+
+.calendar-day.selected {
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  color: white;
+}
+
+.calendar-day.has-tasks::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: #ff4757;
+  border-radius: 50%;
+}
+
+.calendar-tasks {
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 1.5rem;
+}
+
+.date-task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.date-task-list .todo-item {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
 /* ヘッダー */
 .app-header {
   text-align: center;
@@ -264,12 +471,9 @@ body {
   color: white;
 }
 
+/* 天気情報ボタンを非表示 */
 .menu-item:nth-child(3) {
-  background: linear-gradient(135deg, #feca57 0%, #ff6b6b 100%);
-}
-
-.menu-item:nth-child(3) .menu-text {
-  color: white;
+  display: none;
 }
 
 .menu-item:nth-child(4) {
@@ -866,6 +1070,11 @@ body {
 
 /* 旧設定ボタンスタイルは削除（ハンバーガーメニューに移動） */
 
+/* ユーティリティクラス */
+.hidden {
+  display: none !important;
+}
+
 @keyframes badgeGlow {
   0%, 100% { box-shadow: 0 0 5px rgba(253, 121, 168, 0.3); }
   50% { box-shadow: 0 0 15px rgba(253, 121, 168, 0.6); }
@@ -1311,6 +1520,7 @@ body {
 .todo-list li {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
   margin-bottom: 0.75rem;
@@ -1334,6 +1544,67 @@ body {
 .todo-content {
   flex: 1;
   min-width: 0;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.complete-btn, .delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.complete-btn {
+  background: linear-gradient(45deg, #00b894, #26de81);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 184, 148, 0.3);
+}
+
+.complete-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
+}
+
+.delete-btn {
+  background: linear-gradient(45deg, #ff6b6b, #ff5722);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.uncomplete-btn {
+  background: linear-gradient(45deg, #74b9ff, #0984e3);
+  color: white;
+  box-shadow: 0 2px 8px rgba(116, 185, 255, 0.3);
+}
+
+.uncomplete-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(116, 185, 255, 0.4);
+}
+
+.completed-time {
+  font-size: 0.7rem;
+  color: #28a745;
+  font-weight: 500;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: inline-block;
 }
 
 .todo-text {
