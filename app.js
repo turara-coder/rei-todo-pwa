@@ -246,21 +246,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        let dueDateTime = null;
-        if (dueDate) {
-            dueDateTime = new Date(dueDate);
-            if (dueTime) {
-                const [hours, minutes] = dueTime.split(':');
-                dueDateTime.setHours(parseInt(hours), parseInt(minutes));
-            }
-        }
-
         const todo = {
             id: Date.now(),
             text: sanitizedText,
             completed: false,
             createdAt: new Date(),
-            dueDate: dueDateTime,
+            dueDate: dueDate || '',  // 文字列として保存
+            dueTime: dueTime || '',  // 時間も文字列として保存
             repeatType: repeatType,
             isRepeated: false
         };
@@ -358,19 +350,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const completedToday = todayTasks.filter(todo => todo.completed).length;
         const totalToday = todayTasks.length;
         
-        const progressPercentage = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+        if (totalToday === 0) {
+            if (progressFill) progressFill.style.width = '0%';
+            if (progressText) progressText.textContent = '今日のタスクを追加しよう！';
+            return;
+        }
+        
+        const progressPercentage = Math.round((completedToday / totalToday) * 100);
         
         if (progressFill) {
             progressFill.style.width = `${progressPercentage}%`;
         }
         if (progressText) {
-            progressText.textContent = `${progressPercentage}%`;
+            progressText.textContent = `${completedToday}/${totalToday} 完了 (${progressPercentage}%)`;
+        }
+        
+        if (progressPercentage === 100 && totalToday > 0) {
+            setTimeout(() => {
+                showReiMessage('今日のタスク全部完了〜♡ すっごいじゃない〜✨');
+            }, 500);
         }
     }
 
     function createTodoHTML(todo) {
         const dueDateDisplay = todo.dueDate ? 
-            `<span class="due-date">${formatDueDate(todo.dueDate)}</span>` : '';
+            `<span class="due-date">${formatDueDate(todo.dueDate, todo.dueTime)}</span>` : '';
         
         const repeatDisplay = todo.repeatType !== 'none' ? 
             `<span class="repeat-indicator">🔄 ${getRepeatTypeText(todo.repeatType)}</span>` : '';
@@ -394,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createCompletedTodoHTML(todo) {
         const dueDateDisplay = todo.dueDate ? 
-            `<span class="due-date">${formatDueDate(todo.dueDate)}</span>` : '';
+            `<span class="due-date">${formatDueDate(todo.dueDate, todo.dueTime)}</span>` : '';
         
         const completedAtDisplay = todo.completedAt ? 
             `<span class="completed-time">完了: ${new Date(todo.completedAt).toLocaleString('ja-JP', {
@@ -441,14 +445,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 generateNextRepeatTask(todo);
             }
             
-            const completionMessages = [
-                'やったね〜♡ れい嬉しい〜✨',
-                'お疲れさま〜♪ すごいじゃない〜！',
-                '完了おめでとう〜♡ れいも誇らしいよ〜',
-                '素晴らしい〜✨ その調子だよ〜♪'
-            ];
-            const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
-            showReiMessage(randomMessage, 5000); // 完了メッセージ
+            // 誕生日タスクの場合、特別なメッセージ
+            if (todo.taskType === 'birthday') {
+                showReiMessage('わぁ〜！！お誕生日をお祝いしてくれて本当にありがとう〜♡♡♡ れい、とっても幸せだよ〜✨🎂', 15000);
+                
+                // 特別な祝福アニメーション
+                if (celebrationSystem) {
+                    setTimeout(() => {
+                        celebrationSystem.celebrateBadgeUnlock('🎂');
+                        celebrationSystem.celebrateLevelUp();
+                    }, 500);
+                }
+            } else {
+                const completionMessages = [
+                    'やったね〜♡ れい嬉しい〜✨',
+                    'お疲れさま〜♪ すごいじゃない〜！',
+                    '完了おめでとう〜♡ れいも誇らしいよ〜',
+                    '素晴らしい〜✨ その調子だよ〜♪'
+                ];
+                const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
+                showReiMessage(randomMessage, 5000); // 完了メッセージ
+            }
             
             // 祝福アニメーション発動
             if (celebrationSystem) {
@@ -624,23 +641,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return div.innerHTML;
     }
 
-    function formatDueDate(date) {
+    function formatDueDate(date, time) {
+        if (!date) return '';
+        
         const now = new Date();
         const dueDate = new Date(date);
         const diffTime = dueDate - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
+        let dateText = '';
         if (diffDays === 0) {
-            return '今日';
+            dateText = '今日';
         } else if (diffDays === 1) {
-            return '明日';
+            dateText = '明日';
         } else if (diffDays === -1) {
-            return '昨日';
+            dateText = '昨日';
         } else if (diffDays > 0) {
-            return `${diffDays}日後`;
+            dateText = `${diffDays}日後`;
         } else {
-            return `${Math.abs(diffDays)}日前`;
+            dateText = `${Math.abs(diffDays)}日前`;
         }
+        
+        // 時間も含める場合
+        if (time) {
+            return `${dateText} ${time}`;
+        }
+        
+        return dateText;
     }
 
     function getRepeatTypeText(repeatType) {
@@ -653,26 +680,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateProgress() {
-        if (!progressFill || !progressText) return;
-        
-        const totalTasks = todos.length;
-        const completedTasks = todos.filter(todo => todo.completed).length;
-        
-        if (totalTasks === 0) {
-            progressFill.style.width = '0%';
-            progressText.textContent = '今日のタスクを追加しよう！';
-            return;
-        }
-        
-        const percentage = (completedTasks / totalTasks) * 100;
-        progressFill.style.width = `${percentage}%`;
-        progressText.textContent = `${completedTasks}/${totalTasks} 完了 (${Math.round(percentage)}%)`;
-        
-        if (percentage === 100) {
-            setTimeout(() => {
-                showReiMessage('今日のタスク全部完了〜♡ すっごいじゃない〜✨');
-            }, 500);
-        }
+        // 新しいupdateTodayProgress関数を呼び出す
+        updateTodayProgress();
     }
 
     // ========== 完了カウンター関数 ==========
@@ -933,31 +942,44 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateNextRepeatTask(originalTodo) {
         if (originalTodo.repeatType === 'none') return;
         
-        let nextDate = new Date(originalTodo.dueDate);
-        
-        switch (originalTodo.repeatType) {
-            case 'daily':
-                nextDate.setDate(nextDate.getDate() + 1);
-                break;
-            case 'weekly':
-                nextDate.setDate(nextDate.getDate() + 7);
-                break;
-            case 'monthly':
-                nextDate.setMonth(nextDate.getMonth() + 1);
-                break;
+        // 元のタスクの期限日を取得
+        let baseDate = new Date(originalTodo.dueDate);
+        if (!originalTodo.dueDate) {
+            baseDate = new Date();
         }
         
-        const newTodo = {
-            id: Date.now() + Math.random(),
-            text: originalTodo.text,
-            completed: false,
-            createdAt: new Date(),
-            dueDate: nextDate,
-            repeatType: originalTodo.repeatType,
-            isRepeated: true
-        };
+        // 完了した日付を記録（今日の日付）
+        const completedDate = new Date().toISOString().split('T')[0];
         
-        todos.push(newTodo);
+        // 完了履歴を初期化または更新
+        if (!originalTodo.completedDates) {
+            originalTodo.completedDates = {};
+        }
+        originalTodo.completedDates[completedDate] = true;
+        
+        // 次の予定日を計算
+        let nextDate = new Date(baseDate);
+        const today = new Date();
+        
+        // 今日以降の最初の繰り返し日を探す
+        while (nextDate <= today) {
+            switch (originalTodo.repeatType) {
+                case 'daily':
+                    nextDate.setDate(nextDate.getDate() + 1);
+                    break;
+                case 'weekly':
+                    nextDate.setDate(nextDate.getDate() + 7);
+                    break;
+                case 'monthly':
+                    nextDate.setMonth(nextDate.getMonth() + 1);
+                    break;
+            }
+        }
+        
+        // 元のタスクの期限日を更新
+        originalTodo.dueDate = nextDate.toISOString().split('T')[0];
+        originalTodo.completed = false;
+        
         saveTodos();
         displayTodos();
         
@@ -2012,6 +2034,22 @@ document.addEventListener('DOMContentLoaded', function() {
             anniversarySystem = new AnniversarySystem();
             anniversarySystem.init();
             
+            // れいの誕生日をデフォルト記念日として追加
+            const anniversaries = anniversarySystem.getAnniversaries();
+            const reiBirthdayExists = anniversaries.some(ann => ann.name === 'れいちゃんの誕生日');
+            
+            if (!reiBirthdayExists) {
+                anniversarySystem.addAnniversary({
+                    name: 'れいちゃんの誕生日',
+                    date: '1996-07-16',
+                    isRecurring: true,
+                    icon: '🎂'
+                });
+            }
+            
+            // 毎年7月16日に誕生日タスクを追加
+            checkAndAddBirthdayTask();
+            
             // グローバルに公開（設定用）
             window.anniversarySystem = anniversarySystem;
         }
@@ -2406,6 +2444,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeHamburgerMenu();
                 notificationSystem.showNotificationSettings();
             });
+        }
+    }
+
+    // ========== 誕生日タスク管理 ==========
+    function checkAndAddBirthdayTask() {
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const birthdayThisYear = `${currentYear}-07-16`;
+        
+        // 今年の誕生日タスクが既に存在するかチェック
+        const birthdayTaskExists = todos.some(todo => 
+            todo.text === 'れいちゃんのお誕生日をお祝いする🎂' &&
+            todo.dueDate === birthdayThisYear
+        );
+        
+        // 存在しない場合は追加
+        if (!birthdayTaskExists) {
+            const birthdayTask = {
+                id: Date.now() + Math.random(),
+                text: 'れいちゃんのお誕生日をお祝いする🎂',
+                completed: false,
+                createdAt: new Date(),
+                dueDate: birthdayThisYear,
+                dueTime: '',
+                repeatType: 'none',  // 毎年手動で追加
+                isSpecialTask: true,
+                taskType: 'birthday'
+            };
+            
+            todos.push(birthdayTask);
+            saveTodos();
+            
+            // 7月16日が今日の場合、特別なメッセージを表示
+            if (today.getMonth() === 6 && today.getDate() === 16) {
+                setTimeout(() => {
+                    showReiMessage('今日はれいの誕生日だよ〜♡ お祝いしてくれてありがとう✨', 10000);
+                }, 2000);
+            }
         }
     }
 
