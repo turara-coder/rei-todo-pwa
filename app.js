@@ -469,9 +469,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 祝福アニメーション発動
             if (celebrationSystem) {
-                const checkbox = document.querySelector(`input[onchange="toggleComplete(${id})"]`);
-                if (checkbox) {
-                    celebrationSystem.celebrateTaskCompletion(checkbox.parentElement);
+                const completeBtn = document.querySelector(`button[onclick="toggleComplete(${id})"]`);
+                if (completeBtn) {
+                    celebrationSystem.celebrateTaskCompletion(completeBtn.closest('.todo-item'));
                 }
             }
         } else if (wasCompleted && !todo.completed) {
@@ -2035,14 +2035,14 @@ document.addEventListener('DOMContentLoaded', function() {
             anniversarySystem.init();
             
             // れいの誕生日をデフォルト記念日として追加
-            const anniversaries = anniversarySystem.getAnniversaries();
-            const reiBirthdayExists = anniversaries.some(ann => ann.name === 'れいちゃんの誕生日');
+            const reiBirthdayExists = anniversarySystem.anniversaries && 
+                anniversarySystem.anniversaries.some(ann => ann.name === 'れいちゃんの誕生日');
             
             if (!reiBirthdayExists) {
                 anniversarySystem.addAnniversary({
                     name: 'れいちゃんの誕生日',
                     date: '1996-07-16',
-                    isRecurring: true,
+                    type: 'yearly',
                     icon: '🎂'
                 });
             }
@@ -2082,7 +2082,9 @@ document.addEventListener('DOMContentLoaded', function() {
             calendarViewBtn.classList.remove('active');
             todayContainer.classList.remove('hidden');
             calendarContainer.classList.add('hidden');
-            completedContainer.classList.remove('hidden');
+            if (completedContainer) {
+                completedContainer.classList.remove('hidden');
+            }
         }
     }
 
@@ -2092,7 +2094,9 @@ document.addEventListener('DOMContentLoaded', function() {
             calendarViewBtn.classList.add('active');
             todayContainer.classList.add('hidden');
             calendarContainer.classList.remove('hidden');
-            completedContainer.classList.add('hidden');
+            if (completedContainer) {
+                completedContainer.classList.add('hidden');
+            }
             initializeCalendar();
         }
     }
@@ -2170,12 +2174,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 dayElement.classList.add('has-tasks');
             }
             
-            dayElement.addEventListener('click', () => selectCalendarDate(dateStr));
+            dayElement.addEventListener('click', (event) => selectCalendarDate(dateStr, event));
             calendarGrid.appendChild(dayElement);
         }
     }
 
-    function selectCalendarDate(dateStr) {
+    function selectCalendarDate(dateStr, event) {
         // 以前選択された日付のスタイルをクリア
         document.querySelectorAll('.calendar-day.selected').forEach(day => {
             day.classList.remove('selected');
@@ -2494,11 +2498,13 @@ document.addEventListener('DOMContentLoaded', function() {
             completedToggle.textContent = '▶';
         }
         
-        // 今日のビューを初期表示
-        showTodayView();
-        
         // イベントリスナー設定
         setupEventListeners();
+        
+        // 初期表示設定（DOM準備後）
+        setTimeout(() => {
+            showTodayView();
+        }, 100);
     }
 
     // ========== グローバル関数（HTML内から呼び出し用） ==========
