@@ -5,6 +5,7 @@ let celebrationSystem = null;
 let weatherSystem = null;
 let anniversarySystem = null;
 let notificationSystem = null;
+let socialSystem = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM要素の取得
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const weatherSettingsBtn = document.getElementById('weather-settings-btn');
     const anniversarySettingsBtn = document.getElementById('anniversary-settings-btn');
     const notificationSettingsBtn = document.getElementById('notification-settings-btn');
+    const shareBtn = document.getElementById('share-btn');
     const statusBtn = document.getElementById('status-btn');
     const statusModal = document.getElementById('status-modal');
     const statusModalClose = document.getElementById('status-modal-close');
@@ -2069,9 +2071,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof NotificationSystem !== 'undefined') {
             notificationSystem = new NotificationSystem();
             notificationSystem.init();
-            
+
             // グローバルに公開（設定用）
             window.notificationSystem = notificationSystem;
+        }
+    }
+
+    // ========== SNSシェアシステム ==========
+    function initializeSocialSystem() {
+        if (typeof SocialSystem !== 'undefined') {
+            socialSystem = new SocialSystem();
+            socialSystem.init();
+
+            window.socialSystem = socialSystem;
         }
     }
 
@@ -2457,6 +2469,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 notificationSystem.showNotificationSettings();
             });
         }
+
+        // SNSシェアボタン
+        if (shareBtn && socialSystem) {
+            shareBtn.addEventListener('click', () => {
+                closeHamburgerMenu();
+                socialSystem.share();
+            });
+        }
     }
 
     // ========== 誕生日タスク管理 ==========
@@ -2533,6 +2553,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeWeatherSystem(); // 天気システム初期化
     initializeAnniversarySystem(); // 記念日システム初期化
     initializeNotificationSystem(); // 通知システム初期化
+    initializeSocialSystem(); // SNSシェアシステム初期化
     initializeUI(); // UI初期化
     
     // スマホ対応: 初期フォーカス設定
