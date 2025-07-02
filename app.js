@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lastResetDate: null
     };
 
+    // 当日の進捗計算用
+    let lastProgressDate = formatLocalDate(new Date());
+
     const themeDefinitions = {
         default: {
             id: 'default',
@@ -347,10 +350,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateTodayProgress() {
         const today = formatLocalDate(new Date());
-        const todayTasks = todos.filter(todo => 
+
+        // 日付が変わっていたら更新
+        if (lastProgressDate !== today) {
+            lastProgressDate = today;
+        }
+
+        const todayTasks = todos.filter(todo =>
             (todo.dueDate === today || todo.dueDate === '' || !todo.dueDate)
         );
-        const completedToday = todayTasks.filter(todo => todo.completed).length;
+
+        const completedToday = todayTasks.filter(todo => {
+            if (!todo.completed) return false;
+            if (!todo.completedAt) return false;
+            const completedDate = formatLocalDate(new Date(todo.completedAt));
+            return completedDate === today;
+        }).length;
+
         const totalToday = todayTasks.length;
         
         if (totalToday === 0) {
@@ -2618,6 +2634,21 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeNotificationSystem(); // 通知システム初期化
     initializeSocialSystem(); // SNSシェアシステム初期化
     initializeUI(); // UI初期化
+
+    // 日付変化のチェック
+    function checkDailyChange() {
+        const today = formatLocalDate(new Date());
+        if (lastProgressDate !== today) {
+            lastProgressDate = today;
+            resetDailyCompletion();
+            updateTodayProgress();
+            displayTodos();
+        }
+    }
+
+    // 毎分確認
+    checkDailyChange();
+    setInterval(checkDailyChange, 60 * 1000);
     
     // スマホ対応: 初期フォーカス設定
     setTimeout(() => {
