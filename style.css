@@ -2313,3 +2313,68 @@ body {
     opacity: 1;
   }
 }
+
+/* ミニゲームモーダル */
+.mini-game-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+}
+
+.mini-game-content {
+  background: #fff;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  text-align: center;
+}
+
+.mini-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(45deg, #e67e22, #f1c40f);
+  color: white;
+}
+
+.mini-game-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.mini-game-body {
+  padding: 1.5rem;
+}
+
+.mini-game-choices button {
+  font-size: 2rem;
+  margin: 0 10px;
+  padding: 0.5rem 1rem;
+  background: #f7f7f7;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.mini-game-choices button:hover {
+  transform: translateY(-2px);
+}
+
+.mini-game-result {
+  margin-top: 1rem;
+  font-weight: bold;
+}

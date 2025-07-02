@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const weatherSettingsBtn = document.getElementById('weather-settings-btn');
     const anniversarySettingsBtn = document.getElementById('anniversary-settings-btn');
     const notificationSettingsBtn = document.getElementById('notification-settings-btn');
+    const miniGameBtn = document.getElementById('mini-game-btn');
     const shareBtn = document.getElementById('share-btn');
     const statusBtn = document.getElementById('status-btn');
     const statusModal = document.getElementById('status-modal');
@@ -2470,6 +2471,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // ミニゲームボタン
+        if (miniGameBtn) {
+            miniGameBtn.addEventListener('click', () => {
+                closeHamburgerMenu();
+                showMiniGame();
+            });
+        }
+
         // SNSシェアボタン
         if (shareBtn && socialSystem) {
             shareBtn.addEventListener('click', () => {
@@ -2517,6 +2526,59 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== ミニゲーム ==========
+    function showMiniGame() {
+        const modal = document.createElement('div');
+        modal.className = 'mini-game-modal';
+        modal.innerHTML = `
+            <div class="mini-game-content">
+                <div class="mini-game-header">
+                    <h3>🎲 れいちゃんとじゃんけん！</h3>
+                    <button class="mini-game-close">×</button>
+                </div>
+                <div class="mini-game-body">
+                    <div class="mini-game-choices">
+                        <button data-choice="rock">✊</button>
+                        <button data-choice="paper">✋</button>
+                        <button data-choice="scissors">✌️</button>
+                    </div>
+                    <div class="mini-game-result"></div>
+                </div>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector('.mini-game-close').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+        modal.querySelectorAll('.mini-game-choices button').forEach(btn => {
+            btn.addEventListener('click', () => playMiniGameRound(btn.dataset.choice, modal));
+        });
+    }
+
+    function playMiniGameRound(playerChoice, modal) {
+        const choices = ['rock', 'paper', 'scissors'];
+        const reiChoice = choices[Math.floor(Math.random() * choices.length)];
+        let resultText = '';
+        const emoji = { rock: '✊', paper: '✋', scissors: '✌️' };
+
+        if (playerChoice === reiChoice) {
+            resultText = `れいは${emoji[reiChoice]}！あいこだね♪`;
+        } else if (
+            (playerChoice === 'rock' && reiChoice === 'scissors') ||
+            (playerChoice === 'paper' && reiChoice === 'rock') ||
+            (playerChoice === 'scissors' && reiChoice === 'paper')
+        ) {
+            addExp(5);
+            resultText = `れいは${emoji[reiChoice]}！勝ったよ〜✨ +5 EXP`;
+        } else {
+            resultText = `れいは${emoji[reiChoice]}！残念〜💦`;
+        }
+
+        const resultDiv = modal.querySelector('.mini-game-result');
+        if (resultDiv) resultDiv.textContent = resultText;
+    }
+
     // ========== UI初期化 ==========
     function initializeUI() {
         // 完了タスクリストを初期状態で閉じる
@@ -2538,6 +2600,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== グローバル関数（HTML内から呼び出し用） ==========
     window.toggleComplete = toggleComplete;
     window.deleteTodo = deleteTodo;
+    window.showMiniGame = showMiniGame;
 
     // ========== 初期化実行 ==========
     loadTodos();
