@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         todoList.innerHTML = '';
         
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatLocalDate(new Date());
         const todayTasks = todos.filter(todo => 
             !todo.completed && 
             (todo.dueDate === today || todo.dueDate === '' || !todo.dueDate)
@@ -318,11 +318,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         completedList.innerHTML = '';
         
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatLocalDate(new Date());
         const todayCompleted = todos.filter(todo => 
             todo.completed && 
             todo.completedAt &&
-            new Date(todo.completedAt).toISOString().split('T')[0] === today
+            formatLocalDate(new Date(todo.completedAt)) === today
         );
         
         completedCount.textContent = todayCompleted.length;
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateTodayProgress() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatLocalDate(new Date());
         const todayTasks = todos.filter(todo => 
             (todo.dueDate === today || todo.dueDate === '' || !todo.dueDate)
         );
@@ -641,6 +641,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return div.innerHTML;
     }
 
+    // ローカル日付を YYYY-MM-DD 形式で取得
+    function formatLocalDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     function formatDueDate(date, time) {
         if (!date) return '';
         
@@ -686,7 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== 完了カウンター関数 ==========
     function updateCompletionCounter(isCompleting = true) {
-        const today = new Date().toDateString();
+        const today = formatLocalDate(new Date());
         
         // 日付が変わったらリセット
         if (completionData.lastResetDate !== today) {
@@ -757,7 +765,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function resetDailyCompletion() {
-        const today = new Date().toDateString();
+        const today = formatLocalDate(new Date());
         if (completionData.lastResetDate !== today) {
             completionData.todayCompleted = 0;
             completionData.lastResetDate = today;
@@ -787,14 +795,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function syncCompletionDataWithTodos() {
         // 実際のtodosデータから今日の完了数を再計算
-        const today = new Date().toDateString();
+        const today = formatLocalDate(new Date());
         const todaysCompletedTodos = todos.filter(todo => {
             if (!todo.completed) return false;
             
             // completedAtがない場合は今日とみなす（後方互換性）
             if (!todo.completedAt) return true;
             
-            const completedDate = new Date(todo.completedAt).toDateString();
+            const completedDate = formatLocalDate(new Date(todo.completedAt));
             return completedDate === today;
         });
         
@@ -949,7 +957,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // 完了した日付を記録（今日の日付）
-        const completedDate = new Date().toISOString().split('T')[0];
+        const completedDate = formatLocalDate(new Date());
         
         // 完了履歴を初期化または更新
         if (!originalTodo.completedDates) {
@@ -977,7 +985,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // 元のタスクの期限日を更新
-        originalTodo.dueDate = nextDate.toISOString().split('T')[0];
+        originalTodo.dueDate = formatLocalDate(nextDate);
         originalTodo.completed = false;
         
         saveTodos();
@@ -1071,10 +1079,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateStreakOnCompletion() {
-        const today = new Date().toDateString();
+        const today = formatLocalDate(new Date());
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toDateString();
+        const yesterdayStr = formatLocalDate(yesterday);
         
         if (streakData.lastCompletionDate === today) {
             // 今日既に完了済み（連続記録は変わらず）
@@ -1988,7 +1996,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateDailyTaskRecord() {
-        const today = new Date().toDateString();
+        const today = formatLocalDate(new Date());
         if (!badgeData.stats.dailyTasksCompleted[today]) {
             badgeData.stats.dailyTasksCompleted[today] = 0;
         }
@@ -2155,11 +2163,11 @@ document.addEventListener('DOMContentLoaded', function() {
             dayElement.className = 'calendar-day';
             dayElement.textContent = currentDate.getDate();
             
-            const dateStr = currentDate.toISOString().split('T')[0];
+            const dateStr = formatLocalDate(currentDate);
             const tasksForDate = todos.filter(todo => todo.dueDate === dateStr);
             
             // 今日の日付をハイライト
-            const today = new Date().toISOString().split('T')[0];
+            const today = formatLocalDate(new Date());
             if (dateStr === today) {
                 dayElement.classList.add('today');
             }

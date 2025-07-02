@@ -7,6 +7,14 @@ class AnniversarySystem {
         this.lastCheckDate = null;
     }
 
+    // ローカル日付を YYYY-MM-DD 形式で取得
+    formatLocalDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // 初期化
     init() {
         this.loadAnniversaries();
@@ -33,7 +41,7 @@ class AnniversarySystem {
             // 初回利用日を記念日として追加
             const firstUseDate = localStorage.getItem('firstUseDate');
             if (!firstUseDate) {
-                const today = new Date().toISOString().split('T')[0];
+                const today = this.formatLocalDate(new Date());
                 localStorage.setItem('firstUseDate', today);
                 
                 this.addAnniversary({
@@ -67,7 +75,7 @@ class AnniversarySystem {
                 `今日は${anniversary.name}だね〜✨ 素敵な一日にしよう〜！`,
                 `${anniversary.name}を一緒に祝えて嬉しいよ〜♡`
             ],
-            createdAt: new Date().toISOString()
+            createdAt: this.formatLocalDate(new Date())
         };
         
         this.anniversaries.push(newAnniversary);
@@ -129,7 +137,7 @@ class AnniversarySystem {
     // 今日の記念日確認
     checkTodayAnniversaries() {
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        const todayStr = this.formatLocalDate(today);
         
         // 既に今日チェック済みなら何もしない
         if (this.lastCheckDate === todayStr) return;
@@ -168,7 +176,7 @@ class AnniversarySystem {
                 case 'monthly':
                     return annDay === todayDate;
                 case 'once':
-                    return anniversary.date === today.toISOString().split('T')[0];
+                    return anniversary.date === this.formatLocalDate(today);
                 default:
                     return false;
             }
@@ -277,7 +285,7 @@ class AnniversarySystem {
                     <div class="anniversary-add-form">
                         <h4>新しい記念日を追加</h4>
                         <input type="text" id="ann-name" placeholder="記念日の名前（例：初デート記念日）">
-                        <input type="date" id="ann-date" value="${new Date().toISOString().split('T')[0]}">
+                        <input type="date" id="ann-date" value="${this.formatLocalDate(new Date())}">
                         <select id="ann-type">
                             <option value="yearly">毎年</option>
                             <option value="monthly">毎月</option>
