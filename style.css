@@ -492,6 +492,14 @@ body {
   color: white;
 }
 
+.menu-item:nth-child(6) {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+}
+
+.menu-item:nth-child(6) .menu-text {
+  color: white;
+}
+
 /* れいのステータス */
 .rei-status {
   background: rgba(255, 255, 255, 0.95);

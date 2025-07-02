@@ -223,6 +223,7 @@
   - Twitter/LINE/Instagram連携
   - プライバシー設定
   - カスタムメッセージ
+  - [x] Web Share APIによる基本共有機能
 - **優先度**: ⭐⭐
 
 #### 3. ☁️ クラウド同期機能
@@ -382,6 +383,7 @@
 - **説明**: 目標達成をSNSでシェア
 - **実装内容**:
   - Web Share API使用
+  - [x] Web Share APIによる共有機能実装（v3.1）
   - 達成画像生成
   - Twitter/Facebook連携
   - カスタムメッセージ生成
