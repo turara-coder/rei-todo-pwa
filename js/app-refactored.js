@@ -163,11 +163,6 @@ class ReiTodoApp {
                 });
             }
             
-            // 繰り返しタスクの処理
-            if (result.todo.repeatType !== 'none') {
-                this.generateNextRepeatTask(result.todo);
-            }
-            
             // バッジチェック
             setTimeout(() => this.checkAndUnlockBadges(), 1000);
         }
@@ -318,11 +313,6 @@ class ReiTodoApp {
         this.badgeData.stats.totalCompleted++;
         
         localStorage.setItem('badgeData', JSON.stringify(this.badgeData));
-    }
-
-    generateNextRepeatTask(todo) {
-        // 繰り返しタスク生成ロジック
-        // 実装省略
     }
 
     checkAndUnlockBadges() {

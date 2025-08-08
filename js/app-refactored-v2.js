@@ -100,10 +100,6 @@ class ReiTodoApp {
                     this.checkAndUnlockBadges();
                 }, 1000);
                 
-                // 繰り返しタスクの処理
-                if (result.todo.repeatType !== 'none') {
-                    this.generateNextRepeatTask(result.todo);
-                }
                 
                 // レベルアップメッセージの表示
                 if (expResult.levelUp) {
@@ -340,48 +336,6 @@ class ReiTodoApp {
         const themeDefinitions = this.getThemeDefinitions();
         document.body.classList.remove(...Object.keys(themeDefinitions).map(id => `theme-${id}`));
         document.body.classList.add(`theme-${this.themeData.currentTheme}`);
-    }
-    
-    // ========== 繰り返しタスク ==========
-    generateNextRepeatTask(originalTodo) {
-        const nextDate = this.calculateNextRepeatDate(originalTodo.dueDate, originalTodo.repeatType);
-        if (nextDate) {
-            const newTodo = {
-                ...originalTodo,
-                id: Date.now() + Math.random(),
-                completed: false,
-                dueDate: nextDate,
-                isRepeated: true,
-                createdAt: new Date()
-            };
-            
-            this.todoManager.todos.push(newTodo);
-            this.todoManager.saveTodos();
-            
-            this.ui.showReiMessage(`🔄 繰り返しタスク「${originalTodo.text}」を次回分として追加したよ〜♪`);
-        }
-    }
-    
-    calculateNextRepeatDate(currentDate, repeatType) {
-        if (!currentDate) return null;
-        
-        const date = new Date(currentDate);
-        
-        switch (repeatType) {
-            case 'daily':
-                date.setDate(date.getDate() + 1);
-                break;
-            case 'weekly':
-                date.setDate(date.getDate() + 7);
-                break;
-            case 'monthly':
-                date.setMonth(date.getMonth() + 1);
-                break;
-            default:
-                return null;
-        }
-        
-        return date;
     }
     
     // ========== データ永続化 ==========

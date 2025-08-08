@@ -246,28 +246,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addTodo(text, dueDate = '', dueTime = '', repeatType = 'none') {
         const sanitizedText = text.trim().substring(0, 200);
-        
+
         if (!sanitizedText) {
             showReiMessage('タスク内容を入力してね〜？😊');
             return;
         }
 
-        const todo = {
-            id: Date.now(),
+        // 繰り返しタスクの場合は1年分先までまとめて生成
+        const tasksToAdd = [];
+        const hasDue = dueDate || repeatType !== 'none';
+        const baseDate = dueDate ? new Date(dueDate) : new Date();
+        const createdAt = new Date();
+
+        const createTask = (date, isRepeated) => ({
+            id: Date.now() + tasksToAdd.length,
             text: sanitizedText,
             completed: false,
-            createdAt: new Date(),
-            dueDate: dueDate || '',  // 文字列として保存
-            dueTime: dueTime || '',  // 時間も文字列として保存
+            createdAt: createdAt,
+            dueDate: hasDue ? formatLocalDate(date) : '',
+            dueTime: hasDue ? (dueTime || '') : '',
             repeatType: repeatType,
-            isRepeated: false
-        };
+            isRepeated: isRepeated
+        });
 
-        todos.push(todo);
+        if (repeatType !== 'none') {
+            const limit = repeatType === 'daily' ? 365 :
+                         repeatType === 'weekly' ? 52 : 12; // monthly
+            let currentDate = new Date(baseDate);
+            for (let i = 0; i < limit; i++) {
+                tasksToAdd.push(createTask(currentDate, i > 0));
+                if (repeatType === 'daily') currentDate.setDate(currentDate.getDate() + 1);
+                else if (repeatType === 'weekly') currentDate.setDate(currentDate.getDate() + 7);
+                else if (repeatType === 'monthly') currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+        } else {
+            const singleDate = hasDue ? baseDate : new Date();
+            tasksToAdd.push(createTask(singleDate, false));
+        }
+
+        tasksToAdd.forEach(t => todos.push(t));
         saveTodos();
         displayTodos();
         updateProgress();
-        
+
         // メッセージ表示を少し遅延させて他の処理と競合しないようにする
         setTimeout(() => {
             const encouragementMessages = [
@@ -276,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `「${sanitizedText}」、きっとできるよ〜！ファイト〜♡`,
                 `タスク追加完了〜♪ れいと一緒だから大丈夫だよ〜✨`
             ];
-            
+
             const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
             showReiMessage(randomMessage, 5000); // タスク追加メッセージ
         }, 100); // 他の処理完了後にメッセージ表示
@@ -460,9 +481,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkAndUnlockBadges();
             }, 1000);
             
-            if (todo.repeatType !== 'none') {
-                generateNextRepeatTask(todo);
-            }
             
             // 誕生日タスクの場合、特別なメッセージ
             if (todo.taskType === 'birthday') {
@@ -966,54 +984,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function generateNextRepeatTask(originalTodo) {
-        if (originalTodo.repeatType === 'none') return;
-        
-        // 元のタスクの期限日を取得
-        let baseDate = new Date(originalTodo.dueDate);
-        if (!originalTodo.dueDate) {
-            baseDate = new Date();
-        }
-        
-        // 完了した日付を記録（今日の日付）
-        const completedDate = formatLocalDate(new Date());
-        
-        // 完了履歴を初期化または更新
-        if (!originalTodo.completedDates) {
-            originalTodo.completedDates = {};
-        }
-        originalTodo.completedDates[completedDate] = true;
-        
-        // 次の予定日を計算
-        let nextDate = new Date(baseDate);
-        const today = new Date();
-        
-        // 今日以降の最初の繰り返し日を探す
-        while (nextDate <= today) {
-            switch (originalTodo.repeatType) {
-                case 'daily':
-                    nextDate.setDate(nextDate.getDate() + 1);
-                    break;
-                case 'weekly':
-                    nextDate.setDate(nextDate.getDate() + 7);
-                    break;
-                case 'monthly':
-                    nextDate.setMonth(nextDate.getMonth() + 1);
-                    break;
-            }
-        }
-        
-        // 元のタスクの期限日を更新
-        originalTodo.dueDate = formatLocalDate(nextDate);
-        originalTodo.completed = false;
-        
-        saveTodos();
-        displayTodos();
-        
-        setTimeout(() => {
-            showReiMessage(`🔄 繰り返しタスク「${originalTodo.text}」を次回分として追加したよ〜♪`);
-        }, 1000);
-    }
 
     // ========== PWA関数 ==========
     function showInstallBanner() {
